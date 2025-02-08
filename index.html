@@ -6,7 +6,7 @@
   <title>Cadastro de Pedido</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Estilo simples para esconder os campos adicionais */
+    /* Classe para esconder campos */
     .hidden {
       display: none;
     }
@@ -15,16 +15,20 @@
 <body>
   <div class="form-container">
     <h1>Cadastro de Pedido</h1>
+
+    <!-- Exibição da Data -->
     <div class="form-group">
       <span><strong>Data:</strong></span>
       <span id="data_pedido"></span>
     </div>
 
+    <!-- Código do Pedido -->
     <div class="form-group">
       <label for="cod_pedido">Código do Pedido:</label>
       <input type="number" id="cod_pedido" name="cod_pedido" required />
     </div>
 
+    <!-- Tipo do Pedido -->
     <div class="form-group">
       <label for="tipo_pedido">Tipo do Pedido:</label>
       <select id="tipo_pedido" name="tipo_pedido">
@@ -35,23 +39,25 @@
       </select>
     </div>
 
-    <!-- Campo Metragem do Painel (inicialmente escondido) -->
+    <!-- Campo: Metragem do Painel (apenas exibido se PAINEL for selecionado) -->
     <div class="form-group hidden" id="grupo_met_painel">
       <label for="met_painel">Metragem do Painel:</label>
-      <input type="number" id="met_painel" name="met_painel" />
+      <input type="text" id="met_painel" name="met_painel" />
     </div>
 
-    <!-- Campo Outros (inicialmente escondido) -->
+    <!-- Campo: Outros (apenas exibido se OUTROS for selecionado) -->
     <div class="form-group hidden" id="grupo_outros">
       <label for="outros">Outros:</label>
-      <input type="text" id="outros" name="outros" />
+      <input type="number" id="outros" name="outros" />
     </div>
 
+    <!-- Quantidade -->
     <div class="form-group">
       <label for="quantidade">Quantidade:</label>
       <input type="number" id="quantidade" name="quantidade" required />
     </div>
 
+    <!-- Horários -->
     <div class="form-group">
       <label for="hora_inicio">Hora de Início:</label>
       <div class="cronometro-container">
@@ -84,14 +90,27 @@
       </div>
     </div>
 
+    <!-- Observação -->
     <div class="form-group">
       <label for="observacao">Observação:</label>
       <textarea id="observacao" name="observacao" maxlength="200" rows="4"></textarea>
     </div>
 
+    <!-- Campos para Nome do Funcionário -->
+    <div class="form-group">
+      <label for="funcionario1">Nome do Funcionário (preencha ao menos um):</label>
+      <input type="text" id="funcionario1" name="funcionario1" />
+    </div>
+
+    <div class="form-group">
+      <label for="funcionario2">Nome do Funcionário (opcional):</label>
+      <input type="text" id="funcionario2" name="funcionario2" />
+    </div>
+
+    <!-- Botão de Envio -->
     <button class="btn" onclick="enviarDados()">Salvar</button>
   </div>
-  
+
   <script src="script.js"></script>
 </body>
 </html>
