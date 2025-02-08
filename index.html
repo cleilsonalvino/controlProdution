@@ -1,91 +1,97 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Pedido</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Pedido</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Estilo simples para esconder os campos adicionais */
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="form-container">
-        
-        <h1>Cadastro de Pedido</h1>
-        <div class="form-group">
-            <span><strong>Data:</strong></span>
-            <span id="data_pedido"></span>
-        </div>
-        
-            <div class="form-group">
-                <label for="cod_pedido">Código do Pedido:</label>
-                <input type="number" id="cod_pedido" name="cod_pedido" required>
-            </div>
-
-            <div class="form-group">
-                <label for="cod_pedido">Tipo do Pedido:</label>
-                <select name="" id="">
-                    <option value="">CAMISA</option>
-                    <option value="">PAINEL</option>
-                    <option value="">OUTROS</option>
-                </select>
-            </div>
-
-            
-            <div class="form-group">
-                <label for="cod_pedido">Metragem do Painel:</label> <span style="color: red;">deve esta desabilitado</span>
-                <input type="number" id="cod_pedido" name="cod_pedido" required>
-            </div>
-
-            <div class="form-group">
-                <label for="cod_pedido">Outros:</label> <span style="color: red;">deve esta desabilitado</span>
-                <input type="number" id="cod_pedido" name="cod_pedido" required>
-            </div>
-
-
-            <div class="form-group">
-                <label for="quantidade">Quantidade:</label>
-                <input type="number" id="quantidade" name="quantidade" required>
-            </div>
-
-            <div class="form-group">
-                <label for="hora_inicio">Hora de Início:</label>
-                <div class="cronometro-container">
-                    <input type="time" id="hora_inicio" name="hora_inicio" readonly>
-                    <button type="button" class="btn" onclick="registrarHora('inicio')">Registrar</button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="hora_pausa">Hora de Pausa:</label>
-                <div class="cronometro-container">
-                    <input type="time" id="hora_pausa" name="hora_pausa" readonly>
-                    <button type="button" class="btn" onclick="registrarHora('pausa')">Registrar</button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="hora_reinicio">Hora de Reinício:</label>
-                <div class="cronometro-container">
-                    <input type="time" id="hora_reinicio" name="hora_reinicio" readonly>
-                    <button type="button" class="btn" onclick="registrarHora('reinicio')">Registrar</button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="hora_final">Hora Final:</label>
-                <div class="cronometro-container">
-                    <input type="time" id="hora_final" name="hora_final" readonly>
-                    <button type="button" class="btn" onclick="registrarHora('final')">Registrar</button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="observacao">Observação:</label>
-                <textarea id="observacao" name="observacao" maxlength="200" rows="4"></textarea>
-            </div>
-
-            <button class="btn" 
-            onclick="enviarDadoss()">Salvar</button>
+  <div class="form-container">
+    <h1>Cadastro de Pedido</h1>
+    <div class="form-group">
+      <span><strong>Data:</strong></span>
+      <span id="data_pedido"></span>
     </div>
-    <script src="script.js"></script>
+
+    <div class="form-group">
+      <label for="cod_pedido">Código do Pedido:</label>
+      <input type="number" id="cod_pedido" name="cod_pedido" required />
+    </div>
+
+    <div class="form-group">
+      <label for="tipo_pedido">Tipo do Pedido:</label>
+      <select id="tipo_pedido" name="tipo_pedido">
+        <option value="">Selecione</option>
+        <option value="CAMISA">CAMISA</option>
+        <option value="PAINEL">PAINEL</option>
+        <option value="OUTROS">OUTROS</option>
+      </select>
+    </div>
+
+    <!-- Campo Metragem do Painel (inicialmente escondido) -->
+    <div class="form-group hidden" id="grupo_met_painel">
+      <label for="met_painel">Metragem do Painel:</label>
+      <input type="number" id="met_painel" name="met_painel" />
+    </div>
+
+    <!-- Campo Outros (inicialmente escondido) -->
+    <div class="form-group hidden" id="grupo_outros">
+      <label for="outros">Outros:</label>
+      <input type="text" id="outros" name="outros" />
+    </div>
+
+    <div class="form-group">
+      <label for="quantidade">Quantidade:</label>
+      <input type="number" id="quantidade" name="quantidade" required />
+    </div>
+
+    <div class="form-group">
+      <label for="hora_inicio">Hora de Início:</label>
+      <div class="cronometro-container">
+        <input type="time" id="hora_inicio" name="hora_inicio" readonly />
+        <button type="button" class="btn" onclick="registrarHora('inicio')">Registrar</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="hora_pausa">Hora de Pausa:</label>
+      <div class="cronometro-container">
+        <input type="time" id="hora_pausa" name="hora_pausa" readonly />
+        <button type="button" class="btn" onclick="registrarHora('pausa')">Registrar</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="hora_reinicio">Hora de Reinício:</label>
+      <div class="cronometro-container">
+        <input type="time" id="hora_reinicio" name="hora_reinicio" readonly />
+        <button type="button" class="btn" onclick="registrarHora('reinicio')">Registrar</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="hora_final">Hora Final:</label>
+      <div class="cronometro-container">
+        <input type="time" id="hora_final" name="hora_final" readonly />
+        <button type="button" class="btn" onclick="registrarHora('final')">Registrar</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="observacao">Observação:</label>
+      <textarea id="observacao" name="observacao" maxlength="200" rows="4"></textarea>
+    </div>
+
+    <button class="btn" onclick="enviarDados()">Salvar</button>
+  </div>
+  
+  <script src="script.js"></script>
 </body>
 </html>
