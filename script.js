@@ -146,7 +146,7 @@ function salvarDados() {
     enviarParaSheetDB();
   
     // Opcional: Limpa o localStorage e os campos do formulário
-    localStorage.removeItem('pedidoDados');
+    //localStorage.removeItem('pedidoDados');
     document.querySelectorAll('input, textarea, select').forEach(campo => campo.value = '');
     document.getElementById('data_pedido').innerText = '';
     
