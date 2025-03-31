@@ -1,18 +1,26 @@
-import React from 'react';
-import ListaPedidos from './components/ListaPedidos';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Funcionario from './pages/Funcionario'; // Importe o componente Funcionario
+import Administrador from './pages/Administrador'; // Importe o componente Administrador
 
 function App() {
-  const pedidos = [
-    { codigo: 101, nome: "João", tipo: "CAMISA", quantidade: 5, funcionario: "Cleilson", data: "27/03/2025" },
-    { codigo: 102, nome: "Maria", tipo: "PAINEL", quantidade: 2, data: "27/03/2025" },
-    { codigo: 103, nome: "Carlos", tipo: "OUTROS", quantidade: 10, data: "27/03/2025" },
-  ];
-
   return (
-    <div className="container">
-      <h1>Lista de Pedidos</h1>
-      <ListaPedidos pedidos={pedidos} />
-    </div>
+    <Router>
+      <div className="container-md">
+        <Routes>
+          {/* Rota para funcionário */}
+          <Route
+            path="/funcionario"
+            element={<Funcionario />} // Use o componente como JSX
+          />
+          {/* Rota para administrador */}
+          <Route
+            path="/administrador"
+            element={<Administrador />} // Adicione o componente correspondente
+          />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

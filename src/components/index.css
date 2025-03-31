@@ -1,19 +1,8 @@
 
-.card {
-    padding: 2em;
-  }
-  
-  .contentPedidos {
-    display: flex;
-    flex-flow: row wrap;
-  }
-  
-  .boxPedido{
-    text-align: center;
-    border: 1px solid lightgray;
-    border-radius: 10px;
-    padding: 0;
-    flex-basis: 300px;
-    margin: 10px;
-    padding: 5px;
-  }
+
+.btn:disabled {
+  opacity: 0.5; /* Reduz a opacidade */
+  cursor: not-allowed; /* Muda o cursor para indicar inatividade */
+  border-color: #ccc; /* Borda cinza clara */
+  color: #888; /* Texto cinza escuro */
+}
