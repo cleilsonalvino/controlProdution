@@ -18,6 +18,10 @@ function App() {
             path="/administrador"
             element={<Administrador />} // Adicione o componente correspondente
           />
+          <Route
+            path="/"
+            element={<Login />} // Adicione o componente de login
+          />
         </Routes>
       </div>
     </Router>
