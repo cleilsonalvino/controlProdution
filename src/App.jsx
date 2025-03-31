@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Funcionario from './pages/Funcionario'; // Importe o componente Funcionario
 import Administrador from './pages/Administrador'; // Importe o componente Administrador
-
+import Login from './pages/Login'; // Importe o componente Login
 function App() {
   return (
     <Router>

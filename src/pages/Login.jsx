@@ -4,7 +4,8 @@ function Login() {
   return (
     <div>
         <a href="/funcionario">Funcionario</a>
-        <a href="/adnministrador">ADM</a>
+        <br />
+        <a href="/administrador">ADM</a>
     </div>
   )
 }
