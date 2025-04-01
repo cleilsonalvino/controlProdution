@@ -21,9 +21,9 @@ function ListaPedidos() {
 
   return (
 <div>
-  {pedidos.filter(pedido => pedido.situacao !== 'finalizado').length > 0 ? (
+  {pedidos.filter(pedido => pedido.situacao !== 'Finalizado').length > 0 ? (
     pedidos
-      .filter(pedido => pedido.situacao !== 'finalizado') // Filtra os pedidos que não são finalizados
+      .filter(pedido => pedido.situacao !== 'Finalizado') // Filtra os pedidos que não são finalizados
       .map((pedido) => (
         <CardPedido key={pedido.codigo} pedido={pedido} />
       ))
