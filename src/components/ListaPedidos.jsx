@@ -20,15 +20,18 @@ function ListaPedidos() {
   }, []);
 
   return (
-    <div>
-      {pedidos.length > 0 ? (
-        pedidos.map((pedido) => (
-          <CardPedido key={pedido.codigo} pedido={pedido} />  // Passando cada pedido como prop
-        ))
-      ) : (
-        <p>Não há pedidos no momento.</p>  // Mensagem quando não houver pedidos
-      )}
-    </div>
+<div>
+  {pedidos.filter(pedido => pedido.situacao !== 'finalizado').length > 0 ? (
+    pedidos
+      .filter(pedido => pedido.situacao !== 'finalizado') // Filtra os pedidos que não são finalizados
+      .map((pedido) => (
+        <CardPedido key={pedido.codigo} pedido={pedido} />
+      ))
+  ) : (
+    <p>Não há pedidos no momento.</p>
+  )}
+</div>
+
   );
 }
 
