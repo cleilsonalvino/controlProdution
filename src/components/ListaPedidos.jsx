@@ -21,16 +21,19 @@ function ListaPedidos() {
 
   return (
 <div>
-  {pedidos.filter(pedido => pedido.situacao !== 'Finalizado').length > 0 ? (
-    pedidos
-      .filter(pedido => pedido.situacao !== 'Finalizado') // Filtra os pedidos que não são finalizados
-      .map((pedido) => (
+  {(() => {
+    const pedidosFiltrados = pedidos.filter(pedido => pedido.situacao !== 'Finalizado');
+
+    return pedidosFiltrados.length > 0 ? (
+      pedidosFiltrados.map((pedido) => (
         <CardPedido key={pedido.codigo} pedido={pedido} />
       ))
-  ) : (
-    <p>Não há pedidos no momento.</p>
-  )}
+    ) : (
+      <p>Não há pedidos no momento.</p>
+    );
+  })()}
 </div>
+
 
   );
 }
