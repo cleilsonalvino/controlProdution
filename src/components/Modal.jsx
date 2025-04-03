@@ -1,58 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function Modal({ onClose, adicionarPedido }) {
+function Modal({ onClose }) {
+  // Estado do pedido
+  const [pedido, setPedido] = useState({
+    codigo: 0,
+    tipo: '',
+    quantidade: 0,
+    funcionarios: [], // Corrigido: Criado o campo para armazenar os IDs dos funcionários
+  });
 
-  // Função para adicionar o pedido via API
+  // Estado para armazenar os funcionários
+  const [funcionarios, setFuncionarios] = useState([]);
+
+  // Buscar funcionários ao abrir o modal
+  useEffect(() => {
+    async function fetchFuncionarios() {
+      try {
+        const response = await fetch('http://3.17.153.198:3000/funcionarios', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response.ok) throw new Error('Erro ao buscar funcionários');
+
+        const data = await response.json();
+        setFuncionarios(data);
+      } catch (error) {
+        console.error('Erro ao buscar funcionários:', error);
+      }
+    }
+
+    fetchFuncionarios();
+  }, []);
+
+  // Adicionar pedido
   const handleAdicionarPedido = async (pedido) => {
     try {
       const response = await fetch("http://3.17.153.198:3000/adicionar-pedido", {
         method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(pedido),  // Garantir que o pedido seja convertido para JSON
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pedido),
       });
 
-      if (!response.ok) {
-        
-        throw new Error('Falha ao adicionar o pedido');
-      }
-      
-      // Aqui você pode manipular a resposta se necessário, por exemplo:
+      if (!response.ok) throw new Error('Falha ao adicionar o pedido');
+
       const data = await response.json();
       console.log('Pedido adicionado:', data);
     } catch (error) {
-      console.log(pedido)
-      console.log("Erro ao salvar dados:", error);  // Corrigir o console.log
+      console.log("Erro ao salvar dados:", error);
     }
   };
 
-  const [pedido, setPedido] = useState({
-    codigo: Number(0),
-    tipo: '',
-    quantidade: Number(0),
-    responsavel: '',
-  });
-
-  // Função para lidar com mudanças nos campos do formulário
+  // Lidar com mudanças nos campos do formulário
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setPedido((prevPedido) => ({
-      ...prevPedido,
-      [name]: value,
-    }));
+    
+    if (name === "funcionarios") {
+      // Convertendo opções selecionadas para um array de números
+      const selectedOptions = Array.from(e.target.selectedOptions).map(opt => parseInt(opt.value));
+      setPedido((prevPedido) => ({
+        ...prevPedido,
+        [name]: selectedOptions,
+      }));
+    } else {
+      setPedido((prevPedido) => ({
+        ...prevPedido,
+        [name]: value,
+      }));
+    }
   };
 
-  // Função para enviar o pedido e fechar o modal
+  // Enviar o pedido e fechar o modal
   const handleSubmit = async () => {
-    if (!pedido.codigo || !pedido.tipo || !pedido.quantidade || !pedido.responsavel) {
+    if (!pedido.codigo || !pedido.tipo || !pedido.quantidade || pedido.funcionarios.length === 0) {
       alert("Todos os campos devem ser preenchidos.");
       return;
     }
 
-    await handleAdicionarPedido(pedido);  // Espera a requisição antes de fechar o modal
-    onClose(); // Fecha o modal
-    window.location.reload(); // Atualiza a página para refletir as mudanças
+    await handleAdicionarPedido(pedido);
+    onClose();
+    window.location.reload();
   };
 
   return (
@@ -63,12 +90,7 @@ function Modal({ onClose, adicionarPedido }) {
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5">Novo Pedido</h1>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={onClose} // Fecha o modal
-                aria-label="Close"
-              />
+              <button type="button" className="btn-close" onClick={onClose} aria-label="Close" />
             </div>
             <div className="modal-body">
               <div className="form-group">
@@ -109,15 +131,21 @@ function Modal({ onClose, adicionarPedido }) {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="responsavel">Responsável:</label>
-                <input
-                  type="text"
+                <label htmlFor="responsavel">Responsáveis:</label>
+                <select
+                  name="funcionarios"
                   id="responsavel"
-                  name="responsavel"
-                  value={pedido.responsavel}
+                  multiple // Permite múltipla seleção
+                  value={pedido.funcionarios}
                   onChange={handleChange}
                   className="form-control"
-                />
+                >
+                  {funcionarios.map((funcionario) => (
+                    <option key={funcionario.id} value={funcionario.id}>
+                      {funcionario.nome}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="modal-footer">

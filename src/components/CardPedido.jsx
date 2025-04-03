@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import './index.css'; // Importando o CSS para estilização
+import "./index.css"; // Importando o CSS para estilização
 
 function CardPedido({ pedido, onUpdatePedido }) {
   const [localPedido, setLocalPedido] = useState(pedido);
-  const [isRunning, setIsRunning] = useState(pedido.situacao === "Em andamento");
+  const [isRunning, setIsRunning] = useState(
+    pedido.situacao === "Em andamento"
+  );
 
   const atualizarPedido = (data) => {
     setLocalPedido(data);
@@ -14,10 +16,13 @@ function CardPedido({ pedido, onUpdatePedido }) {
   // Função para iniciar o pedido
   const iniciarPedido = async () => {
     try {
-      const response = await fetch(`http://3.17.153.198:3000/iniciar-pedido/${pedido.codigo}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `http://3.17.153.198:3000/iniciar-pedido/${pedido.codigo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Erro ao iniciar o pedido");
       const data = await response.json();
       atualizarPedido(data);
@@ -29,10 +34,13 @@ function CardPedido({ pedido, onUpdatePedido }) {
   // Função para pausar o pedido
   const pausarPedido = async () => {
     try {
-      const response = await fetch(`http://3.17.153.198:3000/pausar-pedido/${pedido.codigo}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `http://3.17.153.198:3000/pausar-pedido/${pedido.codigo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Erro ao pausar o pedido");
       const data = await response.json();
       atualizarPedido(data);
@@ -44,10 +52,13 @@ function CardPedido({ pedido, onUpdatePedido }) {
   // Função para reiniciar o pedido
   const reiniciarPedido = async () => {
     try {
-      const response = await fetch(`http://3.17.153.198:3000/reiniciar-pedido/${pedido.codigo}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `http://3.17.153.198:3000/reiniciar-pedido/${pedido.codigo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Erro ao reiniciar o pedido");
       const data = await response.json();
       atualizarPedido(data);
@@ -59,10 +70,13 @@ function CardPedido({ pedido, onUpdatePedido }) {
   // Função para finalizar o pedido
   const finalizarPedido = async () => {
     try {
-      const response = await fetch(`http://3.17.153.198:3000/finalizar-pedido/${pedido.codigo}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `http://3.17.153.198:3000/finalizar-pedido/${pedido.codigo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Erro ao finalizar o pedido");
       const data = await response.json();
       atualizarPedido(data);
@@ -73,10 +87,13 @@ function CardPedido({ pedido, onUpdatePedido }) {
 
   const deletePedido = async () => {
     try {
-      const response = await fetch(`http://3.17.153.198:3000/deletar-pedido/${pedido.codigo}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `http://3.17.153.198:3000/deletar-pedido/${pedido.codigo}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       if (!response.ok) throw new Error("Erro ao deletar o pedido");
       const alertPlaceholder = document.createElement("div");
       alertPlaceholder.className = "alert alert-success";
@@ -129,10 +146,27 @@ function CardPedido({ pedido, onUpdatePedido }) {
         <h3 className="text-center">Pedido #{localPedido.codigo}</h3>
         <span className="text-warning">{situacao}</span>
       </div>
-      <p><strong>Tipo:</strong> {localPedido.tipo}</p>
-      <p><strong>Quantidade:</strong> {localPedido.quantidade}</p>
-      <p><strong>Data:</strong> {new Date(localPedido.dataAtual).toLocaleDateString("pt-BR")}</p>
-      <p><strong>Responsavel:</strong> {localPedido.responsavel}</p>
+      <p>
+        <strong>Tipo:</strong> {localPedido.tipo}
+      </p>
+      <p>
+        <strong>Quantidade:</strong> {localPedido.quantidade}
+      </p>
+      <p>
+        <strong>Data:</strong>{" "}
+        {new Date(localPedido.dataAtual).toLocaleDateString("pt-BR")}
+      </p>
+      <p>
+        <strong>Responsavel:</strong>{" "}
+        {localPedido.funcionarios && pedido.funcionarios.length > 0
+          ? pedido.funcionarios.map((funcionario, index) => (
+              <span key={funcionario.id}>
+                {funcionario.nome}
+                {index < pedido.funcionarios.length - 1 && ", "}
+              </span>
+            ))
+          : "Nenhum funcionário associado"}
+      </p>
 
       <div className="d-flex gap-2">
         {isRunning ? (
