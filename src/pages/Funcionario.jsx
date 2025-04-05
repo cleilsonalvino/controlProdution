@@ -14,7 +14,6 @@ function Funcionario() {
   return (
     <div className="container-md">
       <h1 className='text-center m-4'>Lista de Pedidos</h1>
-      <a href="/administrador">ADM</a>
       {/* Passando a função adicionarPedido para o componente NovoPedido */}
       <NovoPedido adicionarPedido={adicionarPedido} />
       {/* Passando a lista de pedidos para o componente ListaPedidos */}

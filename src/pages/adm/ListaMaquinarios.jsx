@@ -16,54 +16,67 @@ function ListaMaquinarios() {
     }
 
     listarMaquinarios();
-  }, []); // O array vazio garante que a função será executada apenas uma vez
+  }, []);
+
+  async function deletarMaquinario(id) {
+    if (!window.confirm("Tem certeza que deseja deletar este maquinário?")) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/deletar-maquinario/${id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error("Erro ao deletar o maquinário");
+
+      setMaquinarios((prev) => prev.filter((m) => m.id !== id));
+      alert("Maquinário deletado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao deletar o maquinário:", error);
+      alert("Erro ao deletar o maquinário: " + error.message);
+    }
+  }
 
   return (
-    <div>
-      <h1>Lista de Maquinários</h1>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Código</th>
-            <th>Pedidos em Produção</th>
-            <th>Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-          {maquinarios.map((maquinario) => (
-            <tr key={maquinario.id}>
-              <td>{maquinario.nome}</td>
-              <td>{maquinario.id}</td>
-              <td>{maquinario.pedidos.length}</td>
-              <td>
-                <button
-                  onClick={async () => {
-                    try {
-                      const response = await fetch(
-                        `http://localhost:3000/api/deletar-maquinario/${maquinario.id}`,
-                        {
-                          method: "DELETE",
-                          headers: { "Content-Type": "application/json" },
-                        }
-                      );
-                      if (!response.ok) throw new Error("Erro ao deletar o maquinário");
-                      setMaquinarios((prevMaquinarios) =>
-                        prevMaquinarios.filter((m) => m.id !== maquinario.id)
-                      );
-                    } catch (error) {
-                      console.error("Erro ao deletar o maquinário:", error);
-                      alert("Erro ao deletar o maquinário: " + error.message);
-                    }
-                  }}
-                >
-                  Deletar
-                </button>
-              </td>
+    <div className="container mt-4">
+      <h1 className="mb-4">Lista de Maquinários</h1>
+
+      <div className="table-responsive">
+        <table className="table table-bordered table-hover align-middle text-center">
+          <thead className="table-dark">
+            <tr>
+              <th>Nome</th>
+              <th>Código</th>
+              <th>Pedidos em Produção</th>
+              <th>Ação</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {maquinarios.map((maquinario) => (
+              <tr key={maquinario.id}>
+                <td>{maquinario.nome}</td>
+                <td>{maquinario.id}</td>
+                <td>{maquinario.pedidos?.length || 0}</td>
+                <td>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => deletarMaquinario(maquinario.id)}
+                  >
+                    Deletar
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {maquinarios.length === 0 && (
+              <tr>
+                <td colSpan="4" className="text-center">Nenhum maquinário encontrado.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

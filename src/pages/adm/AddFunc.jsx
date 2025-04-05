@@ -1,60 +1,70 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from 'react-modal';
 
-// Configuração de acessibilidade para o react-modal
 Modal.setAppElement('#root');
 
 function AddFunc() {
-    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const nomeRef = useRef();
+    const setorRef = useRef();
 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
 
-    async function adicioanrFuncionario() {
+    async function adicionarFuncionario(event) {
+        event.preventDefault();
+
+        const nome = nomeRef.current.value;
+        const setor = setorRef.current.value;
+
         const response = await fetch('http://3.17.153.198:3000/adicionar-funcionario', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                nome: document.getElementById('nome').value,
-                setor: document.getElementById('setor').value,
-            }),
+            body: JSON.stringify({ nome, setor }),
         });
+
+        if (response.ok) {
+            alert('Funcionário adicionado com sucesso!');
+            setIsModalOpen(false);
+        } else {
+            alert('Erro ao adicionar funcionário');
+        }
     }
 
     return (
         <div>
             <button onClick={handleOpenModal} style={styles.button}>
-                Novo Funcionario
+                Novo Funcionário
             </button>
             <Modal
                 isOpen={isModalOpen}
                 onRequestClose={handleCloseModal}
                 style={customStyles}
-                contentLabel="Exemplo de Modal"
+                contentLabel="Adicionar Funcionário"
             >
                 <div>
                     <button onClick={handleCloseModal} style={styles.closeButton}>
                         &times;
                     </button>
-                    <p>Adicionar funcionario</p>
-                    <form onSubmit={adicioanrFuncionario} className='p-4'>
-                        <label htmlFor="nome" className='mb-4'>Nome:</label>
-                        <input type="text" id="nome" name="nome" required />
+                    <p>Adicionar funcionário</p>
+                    <form onSubmit={adicionarFuncionario} className='p-4'>
+                        <label className='mb-4'>Nome:</label>
+                        <input type="text" ref={nomeRef} required />
                         <br />
-                        <label htmlFor="setor">Setor:</label>
-                        <select name="" id="setor" required>
+                        <label>Setor:</label>
+                        <select ref={setorRef} required>
                             <option value="">Selecione um setor</option>
                             <option value="cortedetecido">Corte de Tecido</option>
-                            <option value="impressao">Impressao</option>
+                            <option value="impressao">Impressão</option>
                             <option value="cortedepapel">Corte de Papel</option>
                             <option value="sublimacao">Sublimação</option>
                             <option value="costura">Costura</option>
                             <option value="embalagem">Embalagem</option>
                         </select>
                         <br />
-                        <button type="submit" className='mt-3 btn btn-primary' onClick={adicioanrFuncionario}>Adicionar</button>
+                        <button type="submit" className='mt-3 btn btn-primary'>Adicionar</button>
                     </form>
                 </div>
             </Modal>
