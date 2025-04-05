@@ -16,7 +16,7 @@ function Modal({ onClose }) {
   useEffect(() => {
     async function fetchFuncionarios() {
       try {
-        const response = await fetch('http://3.17.153.198:3000/funcionarios', {
+        const response = await fetch('http://localhost:3000/funcionarios', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -36,7 +36,7 @@ function Modal({ onClose }) {
   // Adicionar pedido
   const handleAdicionarPedido = async (pedido) => {
     try {
-      const response = await fetch("http://3.17.153.198:3000/adicionar-pedido", {
+      const response = await fetch("http://localhost:3000/adicionar-pedido", {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pedido),

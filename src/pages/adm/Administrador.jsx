@@ -1,12 +1,8 @@
-// Administrador.jsx
 import React, { useEffect, useState } from "react";
 import "../Administrador.css";
-import AddFunc from "./AddFunc";
-import ListaFuncionarios from "./ListaFuncionarios";
-import AddMaquinario from "./AddMac";
-import ListaMaquinarios from "./ListaMaquinarios";
+import { Outlet } from 'react-router-dom';
 
-// Funções utilitárias para formatação
+// Utilitários
 const formatDateTime = (date) => (date ? new Date(date).toLocaleString() : "-");
 const formatTime = (date) => (date ? new Date(date).toLocaleTimeString() : "-");
 const formatMinutes = (minutes) => (minutes ? `${minutes} min` : "-");
@@ -15,35 +11,34 @@ function Administrador() {
   const [tabelaPedidos, setTabelaPedidos] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deletando, setDeletando] = useState(null);
+
+  async function fetchTabelaPedidos() {
+    try {
+      setLoading(true);
+      const response = await fetch("http://localhost:3000/tabela-pedidos");
+      if (!response.ok) throw new Error("Erro ao buscar a tabela de pedidos");
+      const data = await response.json();
+      setTabelaPedidos(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchTabelaPedidos() {
-      try {
-        setLoading(true);
-        const response = await fetch("http://3.17.153.198:3000/tabela-pedidos");
-        if (!response.ok) throw new Error("Erro ao buscar a tabela de pedidos");
-        const data = await response.json();
-        setTabelaPedidos(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchTabelaPedidos();
   }, []);
 
   async function deletePedido(codigo) {
     if (!window.confirm("Tem certeza que deseja deletar este pedido?")) return;
-
     try {
-      const response = await fetch(
-        `http://3.17.153.198:3000/deletar-pedido/${codigo}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      setDeletando(codigo);
+      const response = await fetch(`http://localhost:3000/deletar-pedido/${codigo}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!response.ok) throw new Error("Erro ao deletar o pedido");
 
@@ -52,8 +47,9 @@ function Administrador() {
       );
       alert("Pedido deletado com sucesso!");
     } catch (error) {
-      console.error("Erro ao deletar o pedido:", error);
       alert("Erro ao deletar o pedido: " + error.message);
+    } finally {
+      setDeletando(null);
     }
   }
 
@@ -65,11 +61,13 @@ function Administrador() {
       <a href="/funcionario">Funcionário</a>
 
       <h1>Pedidos</h1>
+      <button onClick={fetchTabelaPedidos} style={{ marginBottom: "10px" }}>Atualizar Tabela</button>
+
       <table className="tabela-pedidos">
         <thead>
           <tr>
             <th>Código</th>
-            <th>Data Atual</th>
+            <th>Data de Inicio</th>
             <th>Tipo</th>
             <th>Quantidade</th>
             <th>Funcionário</th>
@@ -79,6 +77,7 @@ function Administrador() {
             <th>Hora Reinício</th>
             <th>Hora Final</th>
             <th>Observações</th>
+            <th>Maquinário Usado</th>
             <th>Tempo Produzindo</th>
             <th>Tempo Total</th>
             <th>Ações</th>
@@ -93,13 +92,13 @@ function Administrador() {
               <td>{pedido.quantidade}</td>
               <td>
                 {pedido.funcionarios && pedido.funcionarios.length > 0
-                  ? pedido.funcionarios.map((funcionario, index) => (
-                      <span key={funcionario.id}>
-                        {funcionario.nome}
-                        {index < pedido.funcionarios.length - 1 && ", "}
+                  ? pedido.funcionarios.map((f, i) => (
+                      <span key={f.id}>
+                        {f.nome}
+                        {i < pedido.funcionarios.length - 1 && ", "}
                       </span>
                     ))
-                  : "Nenhum funcionário associado"}
+                  : "Nenhum funcionário"}
               </td>
               <td>{pedido.situacao}</td>
               <td>{formatTime(pedido.horaInicio)}</td>
@@ -107,22 +106,22 @@ function Administrador() {
               <td>{formatTime(pedido.horaReinicio)}</td>
               <td>{formatTime(pedido.horaFinal)}</td>
               <td>{pedido.observacoes || "-"}</td>
+              <td>
+  {pedido.maquinario?.nome || "-"}
+</td>
+
               <td>{formatMinutes(pedido.tempoProduzindo)}</td>
               <td>{formatMinutes(pedido.tempoTotal)}</td>
               <td>
-                <button onClick={() => deletePedido(pedido.codigo)}>
-                  Deletar
+                <button onClick={() => deletePedido(pedido.codigo)} disabled={deletando === pedido.codigo}>
+                  {deletando === pedido.codigo ? "Deletando..." : "Deletar"}
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-      <AddFunc />
-      <ListaFuncionarios />
-      <AddMaquinario />
-      <ListaMaquinarios />
+      <Outlet />
     </div>
   );
 }
