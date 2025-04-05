@@ -6,7 +6,7 @@ function ListaMaquinarios() {
   useEffect(() => {
     async function listarMaquinarios() {
       try {
-        const response = await fetch("http://localhost:3000/maquinarios");
+        const response = await fetch("http://3.17.153.198:3000/maquinarios");
         if (!response.ok) throw new Error("Erro ao listar maquinários");
         const data = await response.json();
         setMaquinarios(data);

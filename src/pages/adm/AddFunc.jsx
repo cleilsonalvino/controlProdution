@@ -11,7 +11,7 @@ function AddFunc() {
     const handleCloseModal = () => setIsModalOpen(false);
 
     async function adicioanrFuncionario() {
-        const response = await fetch('http://localhost:3000/adicionar-funcionario', {
+        const response = await fetch('http://3.17.153.198:3000/adicionar-funcionario', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
