@@ -8,7 +8,7 @@ function ListaPedidos() {
   useEffect(() => {
     async function listarPedidos() {
       try {
-        const response = await fetch("http://localhost:3000/pedidos");  // Altere para a URL correta da sua API
+        const response = await fetch("http://3.17.153.198:3000/pedidos");  // Altere para a URL correta da sua API
         const data = await response.json();
         setPedidos(data);  // Atualiza o estado com a lista de pedidos
       } catch (error) {
