@@ -42,14 +42,19 @@ function Administrador() {
     if (!window.confirm("Tem certeza que deseja deletar este pedido?")) return;
     try {
       setDeletando(codigo);
-      const response = await fetch(`http://3.17.153.198:3000/deletar-pedido/${codigo}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `http://3.17.153.198:3000/deletar-pedido/${codigo}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (!response.ok) throw new Error("Erro ao deletar o pedido");
 
-      setTabelaPedidos((prev) => prev.filter((pedido) => pedido.codigo !== codigo));
+      setTabelaPedidos((prev) =>
+        prev.filter((pedido) => pedido.codigo !== codigo)
+      );
       alert("Pedido deletado com sucesso!");
 
       const totalItens = tabelaPedidos.length - 1;
@@ -64,7 +69,10 @@ function Administrador() {
 
   const totalPaginas = Math.ceil(tabelaPedidos.length / itensPorPagina);
   const indiceInicial = (paginaAtual - 1) * itensPorPagina;
-  const pedidosPaginados = tabelaPedidos.slice(indiceInicial, indiceInicial + itensPorPagina);
+  const pedidosPaginados = tabelaPedidos.slice(
+    indiceInicial,
+    indiceInicial + itensPorPagina
+  );
 
   if (loading) return <div className="tabela-container">Carregando...</div>;
   if (error) return <div className="tabela-container">Erro: {error}</div>;
@@ -104,7 +112,31 @@ function Administrador() {
               <tr key={pedido.codigo}>
                 <td>{pedido.codigo}</td>
                 <td>{formatDateTime(pedido.dataAtual)}</td>
-                <td>{pedido.tipo}</td>
+                <td className="text-capitalize">
+                  <strong>{pedido.tipo}</strong>
+
+                  {/* Detalhes do tipo PAINEL */}
+                  {pedido.tipo === "PAINEL" &&
+                    Array.isArray(pedido.metragem) &&
+                    pedido.metragem.map((m, i) => (
+                      <div key={i} style={{ whiteSpace: "nowrap" }}>
+                        {m}
+                      </div>
+                    ))}
+
+                  {/* Detalhes do tipo LENÇOL */}
+                  {pedido.tipo === "LENÇOL" && pedido.tipoDetalhes?.lencol && (
+                    <div style={{ whiteSpace: "nowrap" }}>
+                      Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}{" "}
+                      <br />
+                      Fronha: {pedido.tipoDetalhes.lencol.quantidadeFronha}{" "}
+                      <br />
+                      Cortina:{" "}
+                      {pedido.tipoDetalhes.lencol.quantidadeCortina ?? "-"}
+                    </div>
+                  )}
+                </td>
+
                 <td>{pedido.quantidade}</td>
                 <td>
                   {pedido.funcionarios?.length
@@ -148,7 +180,9 @@ function Administrador() {
           >
             Anterior
           </button>
-          <span>Página {paginaAtual} de {totalPaginas}</span>
+          <span>
+            Página {paginaAtual} de {totalPaginas}
+          </span>
           <button
             className="btn btn-outline-primary btn-sm"
             onClick={() => setPaginaAtual((p) => Math.min(p + 1, totalPaginas))}
@@ -161,7 +195,9 @@ function Administrador() {
       <GraficoDePedidos
         dataSelecionada={dataSelecionada}
         fetchTabelaPedidos={fetchTabelaPedidos}
-        pedidos={tabelaPedidos.filter(pedido => pedido.dataAtual?.startsWith(dataSelecionada))}
+        pedidos={tabelaPedidos.filter((pedido) =>
+          pedido.dataAtual?.startsWith(dataSelecionada)
+        )}
         setTabelaPedidos={setTabelaPedidos}
       />
     </div>

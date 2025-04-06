@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import AddMaquinario from "./AddMac";
 
 function ListaMaquinarios() {
   const [maquinarios, setMaquinarios] = useState([]);
@@ -23,7 +24,7 @@ function ListaMaquinarios() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/deletar-maquinario/${id}`,
+        `http://3.17.153.198:3000/api/deletar-maquinario/${id}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -41,6 +42,7 @@ function ListaMaquinarios() {
 
   return (
     <div className="container mt-4">
+      <AddMaquinario />
       <h1 className="mb-4">Lista de Maquinários</h1>
 
       <div className="table-responsive">
