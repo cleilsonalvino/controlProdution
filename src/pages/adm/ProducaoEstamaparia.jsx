@@ -81,7 +81,7 @@ function Administrador() {
     <div className="tabela-container p-4">
       <a href="/funcionario">Funcionário</a>
 
-      <h1>Pedidos</h1>
+      <h1>Dados de Produção - Estamparia</h1>
       <button onClick={fetchTabelaPedidos} style={{ marginBottom: "10px" }}>
         Atualizar Tabela
       </button>

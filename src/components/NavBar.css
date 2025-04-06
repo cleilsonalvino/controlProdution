@@ -1,0 +1,18 @@
+.nav-link-custom {
+    color: #333;
+    font-weight: 500;
+    margin: 0 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  
+  .nav-link-custom:hover {
+    color: #007bff;
+  }
+  
+  .nav-link-custom.active {
+    color: #007bff;
+    font-weight: bold;
+    border-bottom: 2px solid #007bff;
+  }
+  

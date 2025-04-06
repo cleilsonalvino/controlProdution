@@ -5,7 +5,7 @@ function Login() {
     <div className='container-md d-flex flex-column justify-content-center align-items-center mt-5'>
         <a href="/funcionario" className='btn btn-primary'>Funcionario</a>
         <br />
-        <a href="/administrador" className='btn btn-primary'>ADM</a>
+        <a href="/dashboard" className='btn btn-primary'>ADM</a>
     </div>
   )
 }
