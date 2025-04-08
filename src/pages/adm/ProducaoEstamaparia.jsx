@@ -1,21 +1,24 @@
 import React, { useEffect, useState } from "react";
 import "../Administrador.css";
 import GraficoDePedidos from "./Graficos";
+import FiltroPedidos from "../../components/FiltroPedidos";
 
 // Utilitários
 const formatDateTime = (date) => (date ? new Date(date).toLocaleString() : "-");
 const formatTime = (date) => (date ? new Date(date).toLocaleTimeString() : "-");
 const formatMinutes = (minutes) => (minutes ? `${minutes} min` : "-");
 
-function Administrador() {
+function ProducaoEstamparia() {
   const [tabelaPedidos, setTabelaPedidos] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deletando, setDeletando] = useState(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [filtroCodigo, setFiltroCodigo] = useState("");
+
   const [dataSelecionada, setDataSelecionada] = useState(() => {
     const hoje = new Date();
-    return hoje.toISOString().split("T")[0]; // yyyy-mm-dd
+    return hoje.toISOString().split("T")[0];
   });
 
   const itensPorPagina = 5;
@@ -23,7 +26,7 @@ function Administrador() {
   async function fetchTabelaPedidos() {
     try {
       setLoading(true);
-      const response = await fetch("http://3.17.153.198:3000/tabela-pedidos");
+      const response = await fetch("http://localhost:3000/tabela-pedidos");
       if (!response.ok) throw new Error("Erro ao buscar a tabela de pedidos");
       const data = await response.json();
       setTabelaPedidos(data);
@@ -43,7 +46,7 @@ function Administrador() {
     try {
       setDeletando(codigo);
       const response = await fetch(
-        `http://3.17.153.198:3000/deletar-pedido/${codigo}`,
+        `http://localhost:3000/deletar-pedido/${codigo}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -67,9 +70,14 @@ function Administrador() {
     }
   }
 
-  const totalPaginas = Math.ceil(tabelaPedidos.length / itensPorPagina);
+  // CORREÇÃO AQUI ⬇
+  const pedidosFiltrados = tabelaPedidos.filter((pedido) =>
+    pedido.codigo.toString().toLowerCase().includes(filtroCodigo.toLowerCase())
+  );
+
+  const totalPaginas = Math.ceil(pedidosFiltrados.length / itensPorPagina);
   const indiceInicial = (paginaAtual - 1) * itensPorPagina;
-  const pedidosPaginados = tabelaPedidos.slice(
+  const pedidosPaginados = pedidosFiltrados.slice(
     indiceInicial,
     indiceInicial + itensPorPagina
   );
@@ -85,6 +93,12 @@ function Administrador() {
       <button onClick={fetchTabelaPedidos} style={{ marginBottom: "10px" }}>
         Atualizar Tabela
       </button>
+      <FiltroPedidos
+        label="Pesquisar por código do pedido"
+        valor={filtroCodigo}
+        aoMudar={setFiltroCodigo}
+        placeholder="Digite o código..."
+      />
 
       <div className="table-responsive">
         <table className="table table-striped table-hover">
@@ -115,7 +129,6 @@ function Administrador() {
                 <td className="text-capitalize">
                   <strong>{pedido.tipo}</strong>
 
-                  {/* Detalhes do tipo PAINEL */}
                   {pedido.tipo === "PAINEL" &&
                     Array.isArray(pedido.metragem) &&
                     pedido.metragem.map((m, i) => (
@@ -124,7 +137,6 @@ function Administrador() {
                       </div>
                     ))}
 
-                  {/* Detalhes do tipo LENÇOL */}
                   {pedido.tipo === "LENÇOL" && pedido.tipoDetalhes?.lencol && (
                     <div style={{ whiteSpace: "nowrap" }}>
                       Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}{" "}
@@ -150,8 +162,25 @@ function Administrador() {
                 </td>
                 <td>{pedido.situacao}</td>
                 <td>{formatTime(pedido.horaInicio)}</td>
-                <td>{formatTime(pedido.horaPausa)}</td>
-                <td>{formatTime(pedido.horaReinicio)}</td>
+                <td>
+                  {pedido.pausas?.length
+                    ? pedido.pausas.map((p, i) => (
+                        <div key={i}>⏸️{formatTime(p.horaPausa)}</div>
+                      ))
+                    : "-"}
+                </td>
+                <td>
+                  {pedido.pausas?.length
+                    ? pedido.pausas.map((p, i) => (
+                        <div key={i}>
+                          ▶️{" "}
+                          {p.horaRetorno
+                            ? formatTime(p.horaRetorno)
+                            : "Em pausa..."}
+                        </div>
+                      ))
+                    : "-"}
+                </td>
                 <td>{formatTime(pedido.horaFinal)}</td>
                 <td>{pedido.observacoes || "-"}</td>
                 <td>{pedido.maquinario?.nome || "-"}</td>
@@ -171,7 +200,6 @@ function Administrador() {
           </tbody>
         </table>
 
-        {/* Paginação */}
         <div className="d-flex justify-content-between align-items-center mt-3">
           <button
             className="btn btn-outline-primary btn-sm"
@@ -192,16 +220,15 @@ function Administrador() {
           </button>
         </div>
       </div>
+
       <GraficoDePedidos
         dataSelecionada={dataSelecionada}
         fetchTabelaPedidos={fetchTabelaPedidos}
-        pedidos={tabelaPedidos.filter((pedido) =>
-          pedido.dataAtual?.startsWith(dataSelecionada)
-        )}
+        pedidos={pedidosFiltrados}
         setTabelaPedidos={setTabelaPedidos}
       />
     </div>
   );
 }
 
-export default Administrador;
+export default ProducaoEstamparia;

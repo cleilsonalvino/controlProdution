@@ -2,10 +2,17 @@ import React, { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import "./index.css";
 
-const API_BASE_URL = "http://3.17.153.198:3000"; // Ajuste para o IP correto se necessário, ex.: "http://3.17.153.198:3000"
+const API_BASE_URL = "http://localhost:3000";
 
 function CardPedido({ pedido, onUpdatePedido }) {
   const [localPedido, setLocalPedido] = useState(pedido);
+  const [editandoCampo, setEditandoCampo] = useState(null);
+  const [formData, setFormData] = useState({
+    codigo: pedido.codigo,
+    tipo: pedido.tipo,
+    quantidade: pedido.quantidade,
+    observacoes: pedido.observacoes || "",
+  });
   const [maquinarios, setMaquinarios] = useState([]);
   const [maquinarioSelecionado, setMaquinarioSelecionado] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -14,6 +21,12 @@ function CardPedido({ pedido, onUpdatePedido }) {
 
   useEffect(() => {
     setLocalPedido(pedido);
+    setFormData({
+      codigo: pedido.codigo,
+      tipo: pedido.tipo,
+      quantidade: pedido.quantidade,
+      observacoes: pedido.observacoes || "",
+    });
   }, [pedido]);
 
   useEffect(() => {
@@ -30,7 +43,6 @@ function CardPedido({ pedido, onUpdatePedido }) {
         setMaquinarios(data);
       } catch (error) {
         setError(error.message);
-        console.error("Erro ao listar maquinários:", error);
       } finally {
         setIsLoading(false);
       }
@@ -57,15 +69,37 @@ function CardPedido({ pedido, onUpdatePedido }) {
       if (onUpdatePedido) onUpdatePedido(data);
     } catch (error) {
       setError(error.message);
-      console.error(`Erro ao ${rota.replace("-", " ")}:`, error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const atualizarCampo = async (campo) => {
+    if (!campo) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/atualizar-pedido/${pedido.codigo}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [campo]: formData[campo] }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao atualizar campo");
+      }
+
+      const pedidoAtualizado = await response.json();
+      setLocalPedido(pedidoAtualizado);
+      if (onUpdatePedido) onUpdatePedido(pedidoAtualizado);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setEditandoCampo(null);
+    }
+  };
+
   const confirmarMaquinarioEIniciar = async () => {
     const idMaquinario = Number(maquinarioSelecionado);
-    
     if (!maquinarioSelecionado || isNaN(idMaquinario) || idMaquinario <= 0) {
       setError("Selecione um maquinário válido antes de iniciar o pedido.");
       return;
@@ -85,39 +119,70 @@ function CardPedido({ pedido, onUpdatePedido }) {
       }
 
       const pedidoAtualizado = await responseVinculacao.json();
-      window.location.reload(); // Recarrega a página para refletir as mudanças
-      setLocalPedido(pedidoAtualizado);
-      if (onUpdatePedido) onUpdatePedido(pedidoAtualizado);
-      setShowModal(false);
-      setMaquinarioSelecionado("");
-
+      window.location.reload();
     } catch (error) {
       setError(error.message);
-      console.error("Erro ao iniciar e vincular pedido:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const renderEditableCampo = (campo, label, tipo = "text") => (
+    <p>
+      <strong>{label}:</strong>{" "}
+      {editandoCampo === campo ? (
+        <input
+          type={tipo}
+          value={formData[campo]}
+          onChange={(e) => setFormData({ ...formData, [campo]: tipo === "number" ? Number(e.target.value) : e.target.value })}
+          onBlur={() => atualizarCampo(campo)}
+          autoFocus
+          className="form-control d-inline-block w-auto"
+        />
+      ) : (
+        <span style={{ cursor: "pointer" }} onClick={() => setEditandoCampo(campo)}>
+          {formData[campo] || <em>Editar...</em>}
+        </span>
+      )}
+    </p>
+  );
+
   return (
     <div className="card boxPedido mt-4 mb-4 p-3">
       <div className="container d-flex justify-content-between align-items-center mb-3">
-        <h3 className="text-center">Pedido #{localPedido.codigo}</h3>
+        <h3 className="text-center">
+          {editandoCampo === "codigo" ? (
+            <input
+              type="number"
+              value={formData.codigo}
+              onChange={(e) => setFormData({ ...formData, codigo: Number(e.target.value) })}
+              onBlur={() => atualizarCampo("codigo")}
+              autoFocus
+              className="form-control d-inline-block w-auto"
+            />
+          ) : (
+            <span style={{ cursor: "pointer" }} onClick={() => setEditandoCampo("codigo")}>
+              Pedido #{formData.codigo}
+            </span>
+          )}
+        </h3>
         <span className="text-warning">{localPedido.situacao}</span>
       </div>
-      <p><strong>Tipo:</strong> {localPedido.tipo}</p>
-      <p><strong>Quantidade:</strong> {localPedido.quantidade}</p>
+
+      {renderEditableCampo("tipo", "Tipo")}
+      {renderEditableCampo("quantidade", "Quantidade", "number")}
+
       <p><strong>Data:</strong> {new Date(localPedido.dataAtual).toLocaleDateString("pt-BR")}</p>
       <p><strong>Maquinário(s):</strong> 
-  {localPedido.maquinarios?.length > 0 
-    ? localPedido.maquinarios.map(m => m.maquinario.nome).join(", ") 
-    : "Não vinculado"}
-</p>
+        {localPedido.maquinarios?.length > 0 
+          ? localPedido.maquinarios.map(m => m.maquinario.nome).join(", ") 
+          : "Não vinculado"}
+      </p>
       <p><strong>Funcionário(s):</strong> 
-  {localPedido.funcionarios?.length > 0
-    ? localPedido.funcionarios.map(f => f.nome).join(", ")  
-    : "Não vinculado"}
-</p>
+        {localPedido.funcionarios?.length > 0
+          ? localPedido.funcionarios.map(f => f.nome).join(", ")  
+          : "Não vinculado"}
+      </p>
 
       {error && <div className="alert alert-danger mt-2">{error}</div>}
 
@@ -177,20 +242,10 @@ function CardPedido({ pedido, onUpdatePedido }) {
                 </select>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                  disabled={isLoading}
-                >
+                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} disabled={isLoading}>
                   Cancelar
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={confirmarMaquinarioEIniciar}
-                  disabled={isLoading || !maquinarioSelecionado}
-                >
+                <button type="button" className="btn btn-primary" onClick={confirmarMaquinarioEIniciar} disabled={isLoading || !maquinarioSelecionado}>
                   {isLoading ? "Carregando..." : "Confirmar e Iniciar"}
                 </button>
               </div>
@@ -209,9 +264,11 @@ CardPedido.propTypes = {
     tipo: PropTypes.string.isRequired,
     quantidade: PropTypes.number.isRequired,
     dataAtual: PropTypes.string.isRequired,
-    maquinario: PropTypes.string
+    observacoes: PropTypes.string,
+    maquinarios: PropTypes.array,
+    funcionarios: PropTypes.array,
   }).isRequired,
-  onUpdatePedido: PropTypes.func
+  onUpdatePedido: PropTypes.func,
 };
 
 export default CardPedido;

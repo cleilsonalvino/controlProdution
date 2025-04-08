@@ -6,7 +6,7 @@ function ListaFuncionarios() {
 
   async function fetchFuncionarios() {
     try {
-      const response = await fetch('http://3.17.153.198:3000/funcionarios');
+      const response = await fetch('http://localhost:3000/funcionarios');
       if (!response.ok) throw new Error('Erro ao buscar os funcionários');
       const data = await response.json();
       setFuncionarios(data);
@@ -21,7 +21,7 @@ function ListaFuncionarios() {
 
   async function deletarFuncionario(id) {
     try {
-      const response = await fetch(`http://3.17.153.198:3000/deletar-funcionario/${id}`, {
+      const response = await fetch(`http://localhost:3000/deletar-funcionario/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });

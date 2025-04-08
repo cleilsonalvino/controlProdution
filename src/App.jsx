@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Funcionario from "./pages/Funcionario";
-import ProducaoEstamaparia from "./pages/adm/ProducaoEstamaparia";
+import ProducaoEstamparia from "./pages/adm/ProducaoEstamaparia";
 import Login from "./pages/Login";
 import ListaMaquinarios from "./pages/adm/ListaMaquinarios";
 import ListaFuncionarios from "./pages/adm/ListaFuncionarios";
@@ -39,7 +39,7 @@ function App() {
             element={
               <>
                 <NavBar />
-                <ProducaoEstamaparia />
+                <ProducaoEstamparia />
               </>
             }
           />

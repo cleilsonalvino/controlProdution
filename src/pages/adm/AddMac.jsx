@@ -28,7 +28,7 @@ function AddMaquinario() {
         console.log("Enviando:", { nome }); // 🔥 Depuração
 
         try {
-            const response = await fetch('http://3.17.153.198:3000/adicionar-maquinario', {
+            const response = await fetch('http://localhost:3000/adicionar-maquinario', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome }),

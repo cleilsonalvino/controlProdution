@@ -53,7 +53,7 @@ function GraficoDePedidos({ pedidos }) {
     inicioDia.setHours(7, 20, 0, 0);
     const fimDia = new Date(dataSelecionada);
     fimDia.setHours(17, 20, 0, 0);
-
+  
     const intervalos = [];
     let atual = new Date(inicioDia);
     while (atual < fimDia) {
@@ -76,27 +76,32 @@ function GraficoDePedidos({ pedidos }) {
       });
       atual = proximo;
     }
-
+  
     const pizza = {};
     const situacaoContagem = {
       "Em andamento": 0,
       Pausado: 0,
       Finalizado: 0,
     };
-
+  
     pedidos.forEach((pedido) => {
-      if (!pedido.horaInicio || !pedido.quantidade) return;
+      if (
+        !pedido.horaInicio ||
+        !pedido.quantidade ||
+        pedido.situacao !== "Finalizado" // <-- aqui o filtro extra
+      ) return;
+  
       const hora = new Date(pedido.horaInicio);
       const dataHoraInicio = new Date(hora.getFullYear(), hora.getMonth(), hora.getDate());
-
+  
       if (dataHoraInicio.getTime() !== dataSelecionada.getTime()) return;
-
+  
       intervalos.forEach((intervalo) => {
         if (hora >= intervalo.inicio && hora < intervalo.fim) {
           intervalo.quantidade += pedido.quantidade;
         }
       });
-
+  
       if (pedido.funcionarios && pedido.funcionarios.length > 0) {
         pedido.funcionarios.forEach((f) => {
           if (!pizza[f.nome]) pizza[f.nome] = 0;
@@ -105,23 +110,24 @@ function GraficoDePedidos({ pedidos }) {
       } else {
         pizza["Sem Funcionário"] = (pizza["Sem Funcionário"] || 0) + pedido.quantidade;
       }
-
+  
       const situacao = pedido.situacao;
       if (situacao === "Em andamento") situacaoContagem["Em andamento"] += 1;
       else if (situacao === "Pausado") situacaoContagem.Pausado += 1;
       else if (situacao === "Finalizado") situacaoContagem.Finalizado += 1;
     });
-
+  
     const pizzaArray = Object.entries(pizza).map(([nome, quantidade]) => ({ nome, quantidade }));
     const situacaoArray = STATUS_LABELS.filter((s) => s !== "Pendente").map((situacao) => ({
       situacao,
       quantidade: situacaoContagem[situacao],
     }));
-
+  
     setDadosBarras(intervalos);
     setDadosPizza(pizzaArray);
     setDadosStatus(situacaoArray);
   }, [dataSelecionada, pedidos]);
+  
 
   useEffect(() => {
     const tipos = { CAMISA: [], PAINEL: [], LENÇOL: [] };
@@ -153,7 +159,7 @@ function GraficoDePedidos({ pedidos }) {
         tempo: tempoCalculado,
       };
     });
-
+    
     setTempoMedioTipos(medias);
   }, [pedidos, quantidadeReferencia]);
 
