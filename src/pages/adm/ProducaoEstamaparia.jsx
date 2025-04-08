@@ -5,7 +5,17 @@ import FiltroPedidos from "../../components/FiltroPedidos";
 
 // Utilitários
 const formatDateTime = (date) => (date ? new Date(date).toLocaleString() : "-");
-const formatTime = (date) => (date ? new Date(date).toLocaleTimeString() : "-");
+const formatTime = (date) =>
+  date
+    ? new Date(date).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: 'America/Sao_Paulo',
+      })
+    : "-";
+
 const formatMinutes = (minutes) => (minutes ? `${minutes} min` : "-");
 
 function ProducaoEstamparia() {
