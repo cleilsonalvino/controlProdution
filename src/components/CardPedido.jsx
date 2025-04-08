@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import "./index.css";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "http://3.17.153.198:3000";
 
 function CardPedido({ pedido, onUpdatePedido }) {
   const [localPedido, setLocalPedido] = useState(pedido);
