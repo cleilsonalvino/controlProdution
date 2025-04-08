@@ -4,7 +4,20 @@ import GraficoDePedidos from "./Graficos";
 import FiltroPedidos from "../../components/FiltroPedidos";
 
 // Utilitários
-const formatDateTime = (date) => (date ? new Date(date).toLocaleString() : "-");
+const formatDateTime = (date) =>
+  date
+    ? new Date(date).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: 'America/Sao_Paulo',
+      })
+    : "-";
+
 const formatTime = (date) =>
   date
     ? new Date(date).toLocaleTimeString('pt-BR', {
@@ -16,7 +29,8 @@ const formatTime = (date) =>
       })
     : "-";
 
-const formatMinutes = (minutes) => (minutes ? `${minutes} min` : "-");
+const formatMinutes = (minutes) => (minutes != null ? `${minutes} min` : "-");
+
 
 function ProducaoEstamparia() {
   const [tabelaPedidos, setTabelaPedidos] = useState([]);
