@@ -9,9 +9,9 @@ function Modal({ onClose }) {
     tipo: "",
     quantidade: 0,
     metragens: [],
-    tipoCamisa: "",  // Para CAMISA
-    tipoLencol: "",  // Para LENÇOL
-    tipoOutros: "",  // Para OUTROS
+    tipoCamisa: "", // Para CAMISA
+    tipoLencol: "", // Para LENÇOL
+    tipoOutros: "", // Para OUTROS
     funcionarios: [],
   });
 
@@ -39,17 +39,6 @@ function Modal({ onClose }) {
     fetchFuncionarios();
   }, []);
 
-  useEffect(() => {
-    if (pedido.tipo === "PAINEL" && Number(pedido.quantidade) > 0) {
-      const novaQuantidade = Number(pedido.quantidade);
-      setPedido((prev) => ({
-        ...prev,
-        metragens: Array.from({ length: novaQuantidade }, (_, i) => prev.metragens[i] || ""),
-      }));
-    }
-  }, [pedido.quantidade, pedido.tipo]);
-  
-
   // Lidar com mudanças nos campos do formulário
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,75 +60,74 @@ function Modal({ onClose }) {
     }
   };
 
- // Função para enviar pedido para o backend
-const handleAdicionarPedido = async (pedidoFinal) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/adicionar-pedido`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pedidoFinal),
-    });
+  // Função para enviar pedido para o backend
+  const handleAdicionarPedido = async (pedidoFinal) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/adicionar-pedido`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pedidoFinal),
+      });
 
-    if (!response.ok) throw new Error("Falha ao adicionar o pedido");
+      if (!response.ok) throw new Error("Falha ao adicionar o pedido");
 
-    const data = await response.json();
-    console.log("Pedido adicionado:", data);
-  } catch (error) {
-    console.log("Erro ao salvar dados:", error);
-  }
-};
-
-// Enviar o pedido e fechar o modal
-const handleSubmit = async () => {
-  if (
-    !pedido.codigo ||
-    !pedido.tipo ||
-    !pedido.quantidade ||
-    pedido.funcionarios.length === 0 ||
-    (pedido.tipo === "PAINEL" &&
-      (!pedido.metragens ||
-        pedido.metragens.length !== Number(pedido.quantidade) ||
-        pedido.metragens.some((m) => m.includes("_") || m.trim() === ""))) ||
-    (pedido.tipo === "CAMISA" && !pedido.tipoCamisa) ||
-    (pedido.tipo === "LENÇOL" && !pedido.tipoLencol) ||
-    (pedido.tipo === "OUTROS" && !pedido.tipoOutros)
-  ) {
-    alert("Todos os campos devem ser preenchidos.");
-    return;
-  }
-
-  const tipoDetalhes = {};
-
-  switch (pedido.tipo) {
-    case "PAINEL":
-      tipoDetalhes.metragens = pedido.metragens;
-      break;
-    case "CAMISA":
-      tipoDetalhes.tipoCamisa = pedido.tipoCamisa;
-      break;
-    case "LENÇOL":
-      tipoDetalhes.tipoLencol = pedido.tipoLencol;
-      break;
-    case "OUTROS":
-      tipoDetalhes.tipoOutros = pedido.tipoOutros;
-      break;
-    default:
-      break;
-  }
-
-  const pedidoFinal = {
-    codigo: pedido.codigo,
-    tipo: pedido.tipo,
-    quantidade: pedido.quantidade,
-    funcionarios: pedido.funcionarios,
-    tipoDetalhes,
+      const data = await response.json();
+      console.log("Pedido adicionado:", data);
+    } catch (error) {
+      console.log("Erro ao salvar dados:", error);
+    }
   };
 
-  await handleAdicionarPedido(pedidoFinal);
-  onClose();
-  window.location.reload();
-};
+  // Enviar o pedido e fechar o modal
+  const handleSubmit = async () => {
+    if (
+      !pedido.codigo ||
+      !pedido.tipo ||
+      !pedido.quantidade ||
+      pedido.funcionarios.length === 0 ||
+      (pedido.tipo === "PAINEL" &&
+        (!pedido.metragens ||
+          pedido.metragens.length !== Number(pedido.quantidade) ||
+          pedido.metragens.some((m) => m.includes("_") || m.trim() === ""))) ||
+      (pedido.tipo === "CAMISA" && !pedido.tipoCamisa) ||
+      (pedido.tipo === "LENÇOL" && !pedido.tipoLencol) ||
+      (pedido.tipo === "OUTROS" && !pedido.tipoOutros)
+    ) {
+      alert("Todos os campos devem ser preenchidos.");
+      return;
+    }
 
+    const tipoDetalhes = {};
+
+    switch (pedido.tipo) {
+      case "PAINEL":
+        tipoDetalhes.metragens = pedido.metragens;
+        break;
+      case "CAMISA":
+        tipoDetalhes.tipoCamisa = pedido.tipoCamisa;
+        break;
+      case "LENÇOL":
+        tipoDetalhes.tipoLencol = pedido.tipoLencol;
+        break;
+      case "OUTROS":
+        tipoDetalhes.tipoOutros = pedido.tipoOutros;
+        break;
+      default:
+        break;
+    }
+
+    const pedidoFinal = {
+      codigo: pedido.codigo,
+      tipo: pedido.tipo,
+      quantidade: pedido.quantidade,
+      funcionarios: pedido.funcionarios,
+      tipoDetalhes,
+    };
+
+    await handleAdicionarPedido(pedidoFinal);
+    onClose();
+    window.location.reload();
+  };
 
   return (
     <>
@@ -246,7 +234,9 @@ const handleSubmit = async () => {
                     className="form-control"
                   >
                     <option value="">Selecione</option>
-                    <option value="CONJUNTO DE COZINHA">CONJUNTO DE COZINHA</option>
+                    <option value="CONJUNTO DE COZINHA">
+                      CONJUNTO DE COZINHA
+                    </option>
                     <option value="TERCEIROS">TERCEIROS</option>
                     <option value="OUTROS">OUTROS</option>
                   </select>
@@ -282,56 +272,82 @@ const handleSubmit = async () => {
                 </select>
               </div>
 
-              {/* Se o tipo for PAINEL, exibirá os campos de metragem */}
               {pedido.tipo === "PAINEL" && (
-  <>
-    <button
-      type="button"
-      className="btn btn-sm btn-secondary mb-2 mt-2"
-      onClick={() => {
-        const metragemPrincipal = pedido.metragens?.[0] || "";
-        const novasMetragens = Array.from(
-          { length: Number(pedido.quantidade) || 0 },
-          () => metragemPrincipal
-        );
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-secondary mb-2 mt-2"
+                    onClick={() => {
+                      const metragemPrincipal = pedido.metragens?.[0] || "";
+                      const novasMetragens = Array.from(
+                        { length: Number(pedido.quantidade) || 0 },
+                        () => metragemPrincipal
+                      );
 
-        handleChange({
-          target: {
-            name: "metragens",
-            value: novasMetragens,
-          },
-        });
-      }}
-    >
-      Repetir a 1ª metragem para todos
-    </button>
-    <div className="form-group">
-      <label htmlFor="metragens">Metragens:</label>
-      <input
-        type="text"
-        name="metragens"
-        value={Array.isArray(pedido.metragens) ? pedido.metragens.join(", ") : ""}
-        onChange={(e) => {
-          const arrayMetragens = e.target.value
-            .split(",")
-            .map((v) => v.trim())
-            .filter((v) => v !== "");
-          handleChange({
-            target: {
-              name: "metragens",
-              value: arrayMetragens,
-            },
-          });
-        }}
-        className="form-control"
-      />
-    </div>
-  </>
-)}
+                      handleChange({
+                        target: {
+                          name: "metragens",
+                          value: novasMetragens,
+                        },
+                      });
+                    }}
+                  >
+                    Repetir a 1ª metragem para todos
+                  </button>
 
+                  {Array.from({ length: Number(pedido.quantidade) || 0 }).map(
+                    (_, index) => (
+                      <div key={index} className="form-group">
+                        <label htmlFor={`metragem-${index}`}>
+                          Metragem {index + 1}:
+                        </label>
+                        <input
+                          type="text"
+                          id={`metragem-${index}`}
+                          name={`metragem-${index}`}
+                          value={pedido.metragens?.[index] || ""}
+                          onChange={(e) => {
+                            let numeros = e.target.value
+                              .replace(/\D/g, "")
+                              .slice(0, 8);
+                            const preenchido = numeros.padEnd(8, "_");
+
+                            const formatado = `${preenchido.slice(
+                              0,
+                              2
+                            )},${preenchido.slice(2, 4)} x ${preenchido.slice(
+                              4,
+                              6
+                            )},${preenchido.slice(6, 8)}`;
+
+                            const novasMetragens = [
+                              ...(pedido.metragens || []),
+                            ];
+                            novasMetragens[index] = formatado;
+
+                            handleChange({
+                              target: {
+                                name: "metragens",
+                                value: novasMetragens,
+                              },
+                            });
+                          }}
+                          placeholder="__,__ x __,__"
+                          className="form-control"
+                          inputMode="numeric"
+                        />
+                      </div>
+                    )
+                  )}
+                </>
+              )}
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={onClose}
+              >
                 Cancelar
               </button>
               <button
