@@ -209,6 +209,8 @@ function CardPedido({ pedido, onUpdatePedido }) {
         }
       );
 
+      window.location.reload(); // Recarrega a página para refletir as mudanças
+
       if (!responseVinculacao.ok) {
         const errorData = await responseVinculacao.json();
         throw new Error(errorData.error || "Erro ao vincular maquinário");
