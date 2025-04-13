@@ -39,7 +39,7 @@ function CardPedido({ pedido, onUpdatePedido }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            maquinarioIds: maquinariosSelecionadosEdicao.map(Number),
+            maquinarioIds: editMaquinariosSelecionados.map(Number),
           }),
         }
       );
@@ -54,30 +54,6 @@ function CardPedido({ pedido, onUpdatePedido }) {
       setShowEditMaquinariosModal(false);
     } catch (error) {
       setError(error.message);
-    }
-  };
-
-  const fazerRequisicao = async (rota, metodo, corpo = null) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_BASE_URL}/${rota}/${pedido.codigo}`, {
-        method: metodo,
-        headers: { "Content-Type": "application/json" },
-        body: corpo ? JSON.stringify(corpo) : null,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Erro ao ${rota.replace("-", " ")}`);
-      }
-      const data = await response.json();
-      setLocalPedido(data);
-      if (onUpdatePedido) onUpdatePedido(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -187,11 +163,35 @@ function CardPedido({ pedido, onUpdatePedido }) {
   };
 
   const confirmarMaquinarioEIniciar = async () => {
+    if (!maquinarioSelecionado || maquinarioSelecionado.length === 0) {
+      setError("Selecione pelo menos um maquinário antes de iniciar o pedido.");
+      return;
+    }
 
     try {
       // Primeiro, inicia o pedido
       await fazerRequisicao("iniciar-pedido", "POST");
 
+      // Depois, vincula todos os maquinários
+      const responseVinculacao = await fetch(
+        `${API_BASE_URL}/vincular-maquinario/${pedido.codigo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            maquinarioIds: maquinarioSelecionado.map(Number),
+          }),
+        }
+      );
+
+      if (!responseVinculacao.ok) {
+        const errorData = await responseVinculacao.json();
+        throw new Error(errorData.error || "Erro ao vincular maquinário");
+      }
+
+      const pedidoAtualizado = await responseVinculacao.json();
+      if (onUpdatePedido) onUpdatePedido(pedidoAtualizado);
+      setShowModal(false);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -323,13 +323,72 @@ function CardPedido({ pedido, onUpdatePedido }) {
         </button>
         <button
           className="btn btn-outline-primary"
-          onClick={() => confirmarMaquinarioEIniciar}
+          onClick={() => setShowModal(true)}
           disabled={localPedido.situacao !== "Pendente" || isLoading}
         >
           {isLoading ? "Carregando..." : "Iniciar"}
         </button>
       </div>
 
+      {showModal && (
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Selecionar Maquinário</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
+              </div>
+              <select
+                className="form-select"
+                multiple
+                onChange={(e) => {
+                  const selectedValues = Array.from(
+                    e.target.selectedOptions,
+                    (option) => option.value
+                  );
+                  setMaquinarioSelecionado(selectedValues);
+                }}
+                value={maquinarioSelecionado}
+                disabled={isLoading}
+              >
+                <option value="">Selecione um ou mais maquinários</option>
+                {maquinarios.map((maquinario) => (
+                  <option key={maquinario.id} value={maquinario.id}>
+                    {maquinario.nome}
+                  </option>
+                ))}
+              </select>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={confirmarMaquinarioEIniciar}
+                  disabled={isLoading || !maquinarioSelecionado}
+                >
+                  {isLoading ? "Carregando..." : "Confirmar e Iniciar"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {showEditMaquinarioModal && (
         <div
           className="modal show d-block"
