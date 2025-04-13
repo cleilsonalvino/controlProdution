@@ -57,6 +57,31 @@ function CardPedido({ pedido, onUpdatePedido }) {
     }
   };
 
+  const fazerRequisicao = async (rota, metodo, corpo = null) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/${rota}/${pedido.codigo}`, {
+        method: metodo,
+        headers: { "Content-Type": "application/json" },
+        body: corpo ? JSON.stringify(corpo) : null,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Erro ao ${rota.replace("-", " ")}`);
+      }
+      const data = await response.json();
+      setLocalPedido(data);
+      if (onUpdatePedido) onUpdatePedido(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   useEffect(() => {
     setLocalPedido(pedido);
     setFormData({
