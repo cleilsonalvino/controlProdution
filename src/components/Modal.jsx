@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const API_BASE_URL = process.env.VITE_REACT_APP_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
 
 function Modal({ onClose }) {
   // Estado do pedido
