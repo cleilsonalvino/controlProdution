@@ -8,31 +8,30 @@ const API_BASE_URL = "http://localhost:3000";
 // Utilitários
 const formatDateTime = (date) =>
   date
-    ? new Date(date).toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
+    ? new Date(date).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
         hour12: false,
-        timeZone: 'America/Sao_Paulo',
+        timeZone: "America/Sao_Paulo",
       })
     : "-";
 
 const formatTime = (date) =>
   date
-    ? new Date(date).toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
+    ? new Date(date).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
         hour12: false,
-        timeZone: 'America/Sao_Paulo',
+        timeZone: "America/Sao_Paulo",
       })
     : "-";
 
 const formatMinutes = (minutes) => (minutes != null ? `${minutes} min` : "-");
-
 
 function ProducaoEstamparia() {
   const [tabelaPedidos, setTabelaPedidos] = useState([]);
@@ -71,13 +70,10 @@ function ProducaoEstamparia() {
     if (!window.confirm("Tem certeza que deseja deletar este pedido?")) return;
     try {
       setDeletando(codigo);
-      const response = await fetch(
-        `${API_BASE_URL}/deletar-pedido/${codigo}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/deletar-pedido/${codigo}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (!response.ok) throw new Error("Erro ao deletar o pedido");
 
@@ -148,81 +144,121 @@ function ProducaoEstamparia() {
             </tr>
           </thead>
           <tbody>
-            {pedidosPaginados.map((pedido) => (
-              <tr key={pedido.codigo}>
-                <td>{pedido.codigo}</td>
-                <td>{formatDateTime(pedido.dataAtual)}</td>
-                <td className="text-capitalize">
-                  <strong>{pedido.tipo}</strong>
+          {pedidosPaginados
+  .sort((a, b) => {
+    const ordemSituacoes = ["Em andamento", "Pausado", "Pendente"];
+    
+    const situacaoA = a.situacao || "";
+    const situacaoB = b.situacao || "";
 
-                  {pedido.tipo === "PAINEL" &&
-                    Array.isArray(pedido.metragem) &&
-                    pedido.metragem.map((m, i) => (
-                      <div key={i} style={{ whiteSpace: "nowrap" }}>
-                        {m}
-                      </div>
-                    ))}
+    // Comparar as situações, colocando as prioritárias no início
+    const indiceSituacaoA = ordemSituacoes.indexOf(situacaoA);
+    const indiceSituacaoB = ordemSituacoes.indexOf(situacaoB);
 
-                  {pedido.tipo === "LENÇOL" && pedido.tipoDetalhes?.lencol && (
-                    <div style={{ whiteSpace: "nowrap" }}>
-                      Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}{" "}
-                      <br />
-                      Fronha: {pedido.tipoDetalhes.lencol.quantidadeFronha}{" "}
-                      <br />
-                      Cortina:{" "}
-                      {pedido.tipoDetalhes.lencol.quantidadeCortina ?? "-"}
-                    </div>
-                  )}
-                </td>
+    if (indiceSituacaoA === -1) return 1; // Se não for uma situação prioritária, coloca depois
+    if (indiceSituacaoB === -1) return -1; // Se não for uma situação prioritária, coloca depois
 
-                <td>{pedido.quantidade}</td>
-                <td>
-                  {pedido.funcionarios?.length
-                    ? pedido.funcionarios.map((f, i) => (
-                        <span key={f.id}>
-                          {f.nome}
-                          {i < pedido.funcionarios.length - 1 && ", "}
-                        </span>
-                      ))
-                    : "Nenhum funcionário"}
-                </td>
-                <td>{pedido.situacao}</td>
-                <td>{formatTime(pedido.horaInicio)}</td>
-                <td>
-                  {pedido.pausas?.length
-                    ? pedido.pausas.map((p, i) => (
-                        <div key={i}>⏸️{formatTime(p.horaPausa)}</div>
-                      ))
-                    : "-"}
-                </td>
-                <td>
-                  {pedido.pausas?.length
-                    ? pedido.pausas.map((p, i) => (
-                        <div key={i}>
-                          ▶️{" "}
-                          {p.horaRetorno
-                            ? formatTime(p.horaRetorno)
-                            : "Em pausa..."}
-                        </div>
-                      ))
-                    : "-"}
-                </td>
-                <td>{formatTime(pedido.horaFinal)}</td>
-                <td>{pedido.observacoes || "-"}</td>
-                <td>{pedido.maquinario?.nome || "-"}</td>
-                <td>{formatMinutes(pedido.tempoProduzindo)}</td>
-                <td>{formatMinutes(pedido.tempoTotal)}</td>
-                <td>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => deletePedido(pedido.codigo)}
-                    disabled={deletando === pedido.codigo}
-                  >
-                    {deletando === pedido.codigo ? "Deletando..." : "Deletar"}
-                  </button>
-                </td>
-              </tr>
-            ))}
+    return indiceSituacaoA - indiceSituacaoB; // Caso contrário, ordena por prioridade
+  })
+  .map((pedido) => (
+    <tr key={pedido.codigo}>
+      <td>{pedido.codigo}</td>
+      <td>{formatDateTime(pedido.dataAtual)}</td>
+      <td className="text-capitalize">
+        <strong>{pedido.tipo}</strong>
+
+        {pedido.tipo === "PAINEL" &&
+          Array.isArray(pedido.metragem) &&
+          pedido.metragem.map((m, i) => (
+            <div key={i} style={{ whiteSpace: "nowrap" }}>
+              {m}
+            </div>
+          ))}
+
+        {pedido.tipo === "LENÇOL" && pedido.tipoDetalhes?.lencol && (
+          <div style={{ whiteSpace: "nowrap" }}>
+            {pedido.tipoDetalhes.lencol.tipo && (
+              <>
+                Tipo: {pedido.tipoDetalhes.lencol.tipo}
+                <br />
+              </>
+            )}
+            Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}
+            <br />
+            Fronha: {pedido.tipoDetalhes.lencol.quantidadeFronha}
+            <br />
+            Cortina:{" "}
+            {pedido.tipoDetalhes.lencol.quantidadeCortina > 0
+              ? pedido.tipoDetalhes.lencol.quantidadeCortina
+              : "-"}
+          </div>
+        )}
+
+        {pedido.tipo === "CAMISA" && pedido.tipoDetalhes?.camisa && (
+          <div>
+            <div style={{ whiteSpace: "nowrap" }}>
+              {pedido.tipoDetalhes.camisa[0].tipo}
+            </div>
+          </div>
+        )}
+
+        {pedido.tipo === "OUTROS" &&
+          pedido.tipoDetalhes?.outrosTipos?.tipo && (
+            <div style={{ whiteSpace: "nowrap" }}>
+              {pedido.tipoDetalhes.outrosTipos.tipo}
+            </div>
+          )}
+      </td>
+
+      <td>{pedido.quantidade}</td>
+      <td>
+        {pedido.funcionarios?.length
+          ? pedido.funcionarios.map((f, i) => (
+              <span key={f.id}>
+                {f.nome}
+                {i < pedido.funcionarios.length - 1 && ", "}
+              </span>
+            ))
+          : "Nenhum funcionário"}
+      </td>
+      <td>{pedido.situacao}</td>
+      <td>{formatTime(pedido.horaInicio)}</td>
+      <td>
+        {pedido.pausas?.length
+          ? pedido.pausas.map((p, i) => (
+              <div key={i}>⏸️{formatTime(p.horaPausa)}</div>
+            ))
+          : "-"}
+      </td>
+      <td>
+        {pedido.pausas?.length
+          ? pedido.pausas.map((p, i) => (
+              <div key={i}>
+                ▶️{" "}
+                {p.horaRetorno
+                  ? formatTime(p.horaRetorno)
+                  : "Em pausa..."}
+              </div>
+            ))
+          : "-"}
+      </td>
+      <td>{formatTime(pedido.horaFinal)}</td>
+      <td>{pedido.observacoes || "-"}</td>
+      <td>{pedido.maquinario?.nome || "-"}</td>
+      <td>{formatMinutes(pedido.tempoProduzindo)}</td>
+      <td>{formatMinutes(pedido.tempoTotal)}</td>
+      <td>
+        <button
+          className="btn btn-danger btn-sm"
+          onClick={() => deletePedido(pedido.codigo)}
+          disabled={deletando === pedido.codigo}
+        >
+          {deletando === pedido.codigo ? "Deletando..." : "Deletar"}
+        </button>
+      </td>
+    </tr>
+  ))}
+
           </tbody>
         </table>
 

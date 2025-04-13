@@ -9,6 +9,9 @@ function Modal({ onClose }) {
     tipo: "",
     quantidade: 0,
     metragens: [],
+    tipoCamisa: "",  // Para CAMISA
+    tipoLencol: "",  // Para LENÇOL
+    tipoOutros: "",  // Para OUTROS
     funcionarios: [],
   });
 
@@ -36,23 +39,16 @@ function Modal({ onClose }) {
     fetchFuncionarios();
   }, []);
 
-  // Adicionar pedido
-  const handleAdicionarPedido = async (pedido) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/adicionar-pedido`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pedido),
-      });
-
-      if (!response.ok) throw new Error("Falha ao adicionar o pedido");
-
-      const data = await response.json();
-      console.log("Pedido adicionado:", data);
-    } catch (error) {
-      console.log("Erro ao salvar dados:", error);
+  useEffect(() => {
+    if (pedido.tipo === "PAINEL" && Number(pedido.quantidade) > 0) {
+      const novaQuantidade = Number(pedido.quantidade);
+      setPedido((prev) => ({
+        ...prev,
+        metragens: Array.from({ length: novaQuantidade }, (_, i) => prev.metragens[i] || ""),
+      }));
     }
-  };
+  }, [pedido.quantidade, pedido.tipo]);
+  
 
   // Lidar com mudanças nos campos do formulário
   const handleChange = (e) => {
@@ -75,28 +71,75 @@ function Modal({ onClose }) {
     }
   };
 
-  // Enviar o pedido e fechar o modal
-  const handleSubmit = async () => {
-    if (
-      !pedido.codigo ||
-      !pedido.tipo ||
-      !pedido.quantidade ||
-      pedido.funcionarios.length === 0 ||
-      (pedido.tipo === "PAINEL" &&
-        (!pedido.metragens ||
-          pedido.metragens.length !== Number(pedido.quantidade) ||
-          pedido.metragens.some((m) => m.includes("_") || m.trim() === ""))
-      )
-    ) {
-      alert("Todos os campos devem ser preenchidos.");
-      return;
-    }
-    
+ // Função para enviar pedido para o backend
+const handleAdicionarPedido = async (pedidoFinal) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/adicionar-pedido`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pedidoFinal),
+    });
 
-    await handleAdicionarPedido(pedido);
-    onClose();
-    window.location.reload();
+    if (!response.ok) throw new Error("Falha ao adicionar o pedido");
+
+    const data = await response.json();
+    console.log("Pedido adicionado:", data);
+  } catch (error) {
+    console.log("Erro ao salvar dados:", error);
+  }
+};
+
+// Enviar o pedido e fechar o modal
+const handleSubmit = async () => {
+  if (
+    !pedido.codigo ||
+    !pedido.tipo ||
+    !pedido.quantidade ||
+    pedido.funcionarios.length === 0 ||
+    (pedido.tipo === "PAINEL" &&
+      (!pedido.metragens ||
+        pedido.metragens.length !== Number(pedido.quantidade) ||
+        pedido.metragens.some((m) => m.includes("_") || m.trim() === ""))) ||
+    (pedido.tipo === "CAMISA" && !pedido.tipoCamisa) ||
+    (pedido.tipo === "LENÇOL" && !pedido.tipoLencol) ||
+    (pedido.tipo === "OUTROS" && !pedido.tipoOutros)
+  ) {
+    alert("Todos os campos devem ser preenchidos.");
+    return;
+  }
+
+  const tipoDetalhes = {};
+
+  switch (pedido.tipo) {
+    case "PAINEL":
+      tipoDetalhes.metragens = pedido.metragens;
+      break;
+    case "CAMISA":
+      tipoDetalhes.tipoCamisa = pedido.tipoCamisa;
+      break;
+    case "LENÇOL":
+      tipoDetalhes.tipoLencol = pedido.tipoLencol;
+      break;
+    case "OUTROS":
+      tipoDetalhes.tipoOutros = pedido.tipoOutros;
+      break;
+    default:
+      break;
+  }
+
+  const pedidoFinal = {
+    codigo: pedido.codigo,
+    tipo: pedido.tipo,
+    quantidade: pedido.quantidade,
+    funcionarios: pedido.funcionarios,
+    tipoDetalhes,
   };
+
+  await handleAdicionarPedido(pedidoFinal);
+  onClose();
+  window.location.reload();
+};
+
 
   return (
     <>
@@ -136,6 +179,9 @@ function Modal({ onClose }) {
                     setPedido((prev) => ({
                       ...prev,
                       tipo: value,
+                      tipoCamisa: value === "CAMISA" ? prev.tipoCamisa : "",
+                      tipoLencol: value === "LENÇOL" ? prev.tipoLencol : "",
+                      tipoOutros: value === "OUTROS" ? prev.tipoOutros : "",
                       metragens: value === "PAINEL" ? prev.metragens : [],
                     }));
                   }}
@@ -143,54 +189,69 @@ function Modal({ onClose }) {
                 >
                   <option value="">Selecione</option>
                   <option value="CAMISA">CAMISA</option>
-                  
                   <option value="PAINEL">PAINEL</option>
                   <option value="LENÇOL">LENÇOL</option>
                   <option value="OUTROS">OUTROS</option>
                 </select>
               </div>
 
-              {pedido.tipo === "CAMISA" && 
-                  <div className="form-group mt-3 mb-3">
-                    <label htmlFor="camisa">Tipo:</label>
-                    <select name="" id="">
-                      <option value="">Selecione</option>
-                      <option value="TRADICIONAL">TRADICIONAL</option>
-                      <option value="MANGA LONGA">MANGA LONGA</option>
-                      <option value="REGATA">REGATA</option>
-                      <option value="PARCIAL - FRENTE">PARCIAL - FRENTE</option>
-                      <option value="PARCIAL - COSTA">PARCIAL - COSTA</option>
-                      <option value="PARCIAL - MANGA">PARCIAL - MANGA</option>
+              {pedido.tipo === "CAMISA" && (
+                <div className="form-group mt-3 mb-3">
+                  <label htmlFor="camisa">Tipo de Camisa:</label>
+                  <select
+                    name="tipoCamisa"
+                    id="tipoCamisa"
+                    value={pedido.tipoCamisa}
+                    onChange={handleChange}
+                    className="form-control"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="TRADICIONAL">TRADICIONAL</option>
+                    <option value="MANGA LONGA">MANGA LONGA</option>
+                    <option value="REGATA">REGATA</option>
+                    <option value="PARCIAL - FRENTE">PARCIAL - FRENTE</option>
+                    <option value="PARCIAL - COSTA">PARCIAL - COSTA</option>
+                    <option value="PARCIAL - MANGA">PARCIAL - MANGA</option>
+                  </select>
+                </div>
+              )}
 
-                    </select>
-                  </div>
-                }
+              {pedido.tipo === "LENÇOL" && (
+                <div className="form-group mt-3 mb-3">
+                  <label htmlFor="lencol">Tipo de Lençol:</label>
+                  <select
+                    name="tipoLencol"
+                    id="tipoLencol"
+                    value={pedido.tipoLencol}
+                    onChange={handleChange}
+                    className="form-control"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="LENÇOL CASAL">LENÇOL CASAL/COUCHA</option>
+                    <option value="LENÇOL SOLTEIRO">LENÇOL SOLTEIRO</option>
+                    <option value="KIT CASAL">KIT CASAL</option>
+                    <option value="KIT SOLTEIRO">KIT SOLTEIRO</option>
+                  </select>
+                </div>
+              )}
 
-              {pedido.tipo === "LENÇOL" &&
-                  <div className="form-group mt-3 mb-3">
-                    <label htmlFor="lençol">Tipo:</label>
-                    <select name="" id="">
-                      <option value="">Selecione</option>
-                      <option value="LENÇOL CASAL">LENÇOL CASAL</option>
-                      <option value="LENÇOL SOLTEIRO">LENÇOL SOLTEIRO</option>
-                      <option value="KIT CASAL">KIT CASAL</option>
-                      <option value="KIT SOLTEIRO">KIT SOLTEIRO</option>
-                      <option value="CONJUNTO DE COZINHA">CONJUNTO DE COZINHA</option>
-                    </select>
-                  </div>
-                }
-
-              {pedido.tipo === "OUTROS" &&
-                  <div className="form-group mt-3 mb-3">
-                    <label htmlFor="outros">Tipo:</label>
-                    <select name="" id="">
-                      <option value="">Selecione</option>
-                      <option value="CONJUNTO DE COZINHA">CONJUNTO DE COZINHA</option>
-                      <option value="TERCEIROS">TERCEIROS</option>
-                    </select>
-                  </div>
-                }
-                
+              {pedido.tipo === "OUTROS" && (
+                <div className="form-group mt-3 mb-3">
+                  <label htmlFor="outros">Tipo de Pedido:</label>
+                  <select
+                    name="tipoOutros"
+                    id="tipoOutros"
+                    value={pedido.tipoOutros}
+                    onChange={handleChange}
+                    className="form-control"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="CONJUNTO DE COZINHA">CONJUNTO DE COZINHA</option>
+                    <option value="TERCEIROS">TERCEIROS</option>
+                    <option value="OUTROS">OUTROS</option>
+                  </select>
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="quantidade">Quantidade:</label>
@@ -208,7 +269,7 @@ function Modal({ onClose }) {
                 <select
                   name="funcionarios"
                   id="responsavel"
-                  multiple // Permite múltipla seleção
+                  multiple
                   value={pedido.funcionarios}
                   onChange={handleChange}
                   className="form-control"
@@ -220,6 +281,8 @@ function Modal({ onClose }) {
                   ))}
                 </select>
               </div>
+
+              {/* Se o tipo for PAINEL, exibirá os campos de metragem */}
               {pedido.tipo === "PAINEL" && (
   <>
     <button
@@ -242,61 +305,41 @@ function Modal({ onClose }) {
     >
       Repetir a 1ª metragem para todos
     </button>
-
-    {Array.from({ length: Number(pedido.quantidade) || 0 }).map(
-      (_, index) => (
-        <div key={index} className="form-group">
-          <label htmlFor={`metragem-${index}`}>
-            Metragem {index + 1}:
-          </label>
-          <input
-            type="text"
-            id={`metragem-${index}`}
-            name={`metragem-${index}`}
-            value={pedido.metragens?.[index] || ""}
-            onChange={(e) => {
-              let numeros = e.target.value
-                .replace(/\D/g, "")
-                .slice(0, 6);
-              const preenchido = numeros.padEnd(6, "_");
-              const formatado = `${preenchido[0]},${preenchido[1]}${preenchido[2]} x ${preenchido[3]},${preenchido[4]}${preenchido[5]}`;
-
-              const novasMetragens = [...(pedido.metragens || [])];
-              novasMetragens[index] = formatado;
-
-              handleChange({
-                target: {
-                  name: "metragens",
-                  value: novasMetragens,
-                },
-              });
-            }}
-            placeholder="_,__ x _,__"
-            className="form-control"
-            inputMode="numeric"
-          />
-        </div>
-      )
-    )}
+    <div className="form-group">
+      <label htmlFor="metragens">Metragens:</label>
+      <input
+        type="text"
+        name="metragens"
+        value={Array.isArray(pedido.metragens) ? pedido.metragens.join(", ") : ""}
+        onChange={(e) => {
+          const arrayMetragens = e.target.value
+            .split(",")
+            .map((v) => v.trim())
+            .filter((v) => v !== "");
+          handleChange({
+            target: {
+              name: "metragens",
+              value: arrayMetragens,
+            },
+          });
+        }}
+        className="form-control"
+      />
+    </div>
   </>
 )}
 
-
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={onClose}
-              >
-                Fechar
+              <button type="button" className="btn btn-secondary" onClick={onClose}>
+                Cancelar
               </button>
               <button
                 type="button"
                 className="btn btn-primary"
                 onClick={handleSubmit}
               >
-                Confirmar
+                Adicionar Pedido
               </button>
             </div>
           </div>
