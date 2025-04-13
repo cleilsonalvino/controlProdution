@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import Modal from 'react-modal';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.VITE_REACT_APP_API_BASE_URL;
 
 Modal.setAppElement('#root');
 

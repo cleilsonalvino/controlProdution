@@ -3,7 +3,7 @@ import "../Administrador.css";
 import GraficoDePedidos from "./Graficos";
 import FiltroPedidos from "../../components/FiltroPedidos";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.VITE_REACT_APP_API_BASE_URL;
 
 // Utilitários
 const formatDateTime = (date) =>

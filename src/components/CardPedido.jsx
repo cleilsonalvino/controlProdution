@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import "./index.css";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.VITE_REACT_APP_API_BASE_URL;
  
 function CardPedido({ pedido, onUpdatePedido }) {
   const [localPedido, setLocalPedido] = useState(pedido);
