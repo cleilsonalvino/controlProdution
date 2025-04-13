@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CardPedido from "./CardPedido";
 
-const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 function ListaPedidos() {
   const [pedidos, setPedidos] = useState([]);  // Estado para armazenar a lista de pedidos
