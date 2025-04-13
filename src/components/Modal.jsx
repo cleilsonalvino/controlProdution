@@ -143,11 +143,55 @@ function Modal({ onClose }) {
                 >
                   <option value="">Selecione</option>
                   <option value="CAMISA">CAMISA</option>
+                  
                   <option value="PAINEL">PAINEL</option>
                   <option value="LENÇOL">LENÇOL</option>
                   <option value="OUTROS">OUTROS</option>
                 </select>
               </div>
+
+              {pedido.tipo === "CAMISA" && 
+                  <div className="form-group mt-3 mb-3">
+                    <label htmlFor="camisa">Tipo:</label>
+                    <select name="" id="">
+                      <option value="">Selecione</option>
+                      <option value="TRADICIONAL">TRADICIONAL</option>
+                      <option value="MANGA LONGA">MANGA LONGA</option>
+                      <option value="REGATA">REGATA</option>
+                      <option value="PARCIAL - FRENTE">PARCIAL - FRENTE</option>
+                      <option value="PARCIAL - COSTA">PARCIAL - COSTA</option>
+                      <option value="PARCIAL - MANGA">PARCIAL - MANGA</option>
+
+                    </select>
+                  </div>
+                }
+
+              {pedido.tipo === "LENÇOL" &&
+                  <div className="form-group mt-3 mb-3">
+                    <label htmlFor="lençol">Tipo:</label>
+                    <select name="" id="">
+                      <option value="">Selecione</option>
+                      <option value="LENÇOL CASAL">LENÇOL CASAL</option>
+                      <option value="LENÇOL SOLTEIRO">LENÇOL SOLTEIRO</option>
+                      <option value="KIT CASAL">KIT CASAL</option>
+                      <option value="KIT SOLTEIRO">KIT SOLTEIRO</option>
+                      <option value="CONJUNTO DE COZINHA">CONJUNTO DE COZINHA</option>
+                    </select>
+                  </div>
+                }
+
+              {pedido.tipo === "OUTROS" &&
+                  <div className="form-group mt-3 mb-3">
+                    <label htmlFor="outros">Tipo:</label>
+                    <select name="" id="">
+                      <option value="">Selecione</option>
+                      <option value="CONJUNTO DE COZINHA">CONJUNTO DE COZINHA</option>
+                      <option value="TERCEIROS">TERCEIROS</option>
+                    </select>
+                  </div>
+                }
+                
+
               <div className="form-group">
                 <label htmlFor="quantidade">Quantidade:</label>
                 <input
@@ -176,42 +220,68 @@ function Modal({ onClose }) {
                   ))}
                 </select>
               </div>
-              {pedido.tipo === "PAINEL" &&
-                Array.from({ length: Number(pedido.quantidade) || 0 }).map(
-                  (_, index) => (
-                    <div key={index} className="form-group">
-                      <label htmlFor={`metragem-${index}`}>
-                        Metragem {index + 1}:
-                      </label>
-                      <input
-                        type="text"
-                        id={`metragem-${index}`}
-                        name={`metragem-${index}`}
-                        value={pedido.metragens?.[index] || ""}
-                        onChange={(e) => {
-                          let numeros = e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 6);
-                          const preenchido = numeros.padEnd(6, "_");
-                          const formatado = `${preenchido[0]},${preenchido[1]}${preenchido[2]} x ${preenchido[3]},${preenchido[4]}${preenchido[5]}`;
+              {pedido.tipo === "PAINEL" && (
+  <>
+    <button
+      type="button"
+      className="btn btn-sm btn-secondary mb-2 mt-2"
+      onClick={() => {
+        const metragemPrincipal = pedido.metragens?.[0] || "";
+        const novasMetragens = Array.from(
+          { length: Number(pedido.quantidade) || 0 },
+          () => metragemPrincipal
+        );
 
-                          const novasMetragens = [...(pedido.metragens || [])];
-                          novasMetragens[index] = formatado;
+        handleChange({
+          target: {
+            name: "metragens",
+            value: novasMetragens,
+          },
+        });
+      }}
+    >
+      Repetir a 1ª metragem para todos
+    </button>
 
-                          handleChange({
-                            target: {
-                              name: "metragens",
-                              value: novasMetragens,
-                            },
-                          });
-                        }}
-                        placeholder="_,__ x _,__"
-                        className="form-control"
-                        inputMode="numeric"
-                      />
-                    </div>
-                  )
-                )}
+    {Array.from({ length: Number(pedido.quantidade) || 0 }).map(
+      (_, index) => (
+        <div key={index} className="form-group">
+          <label htmlFor={`metragem-${index}`}>
+            Metragem {index + 1}:
+          </label>
+          <input
+            type="text"
+            id={`metragem-${index}`}
+            name={`metragem-${index}`}
+            value={pedido.metragens?.[index] || ""}
+            onChange={(e) => {
+              let numeros = e.target.value
+                .replace(/\D/g, "")
+                .slice(0, 6);
+              const preenchido = numeros.padEnd(6, "_");
+              const formatado = `${preenchido[0]},${preenchido[1]}${preenchido[2]} x ${preenchido[3]},${preenchido[4]}${preenchido[5]}`;
+
+              const novasMetragens = [...(pedido.metragens || [])];
+              novasMetragens[index] = formatado;
+
+              handleChange({
+                target: {
+                  name: "metragens",
+                  value: novasMetragens,
+                },
+              });
+            }}
+            placeholder="_,__ x _,__"
+            className="form-control"
+            inputMode="numeric"
+          />
+        </div>
+      )
+    )}
+  </>
+)}
+
+
             </div>
             <div className="modal-footer">
               <button
