@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import PropTypes from 'prop-types';
+import React, { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import "./index.css";
 
 const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
- 
+
 function CardPedido({ pedido, onUpdatePedido }) {
   const [localPedido, setLocalPedido] = useState(pedido);
   const [editandoCampo, setEditandoCampo] = useState(null);
@@ -14,10 +14,48 @@ function CardPedido({ pedido, onUpdatePedido }) {
     observacoes: pedido.observacoes || "",
   });
   const [maquinarios, setMaquinarios] = useState([]);
-  const [maquinarioSelecionado, setMaquinarioSelecionado] = useState("");
+  const [maquinarioSelecionado, setMaquinarioSelecionado] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showEditMaquinarioModal, setShowEditMaquinarioModal] = useState(false);
+  const [maquinariosSelecionadosEdicao, setMaquinariosSelecionadosEdicao] =
+    useState([]);
+
+  const abrirModalEdicaoMaquinarios = () => {
+    const selecionados =
+      localPedido.maquinarios?.map(
+        (m) => m.maquinarioId?.toString() || m.maquinario?.id?.toString()
+      ) || [];
+      setMaquinariosSelecionadosEdicao(selecionados);
+    setShowEditMaquinariosModal(true);
+  };
+
+  const salvarMaquinariosEditados = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/vincular-maquinario/${pedido.codigo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            maquinarioIds: editMaquinariosSelecionados.map(Number),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao atualizar maquinários");
+      }
+
+      const pedidoAtualizado = await response.json();
+      if (onUpdatePedido) onUpdatePedido(pedidoAtualizado);
+      setShowEditMaquinariosModal(false);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   useEffect(() => {
     setLocalPedido(pedido);
@@ -50,38 +88,64 @@ function CardPedido({ pedido, onUpdatePedido }) {
     listarMaquinarios();
   }, []);
 
-  const fazerRequisicao = async (rota, metodo, corpo = null) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_BASE_URL}/${rota}/${pedido.codigo}`, {
-        method: metodo,
-        headers: { "Content-Type": "application/json" },
-        body: corpo ? JSON.stringify(corpo) : null,
-      });
+  const [observacao, setObservacao] = useState("");
+  const [status, setStatus] = useState(null);
+  const debounceRef = useRef(null);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Erro ao ${rota.replace("-", " ")}`);
-      }
-      const data = await response.json();
-      setLocalPedido(data);
-      if (onUpdatePedido) onUpdatePedido(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
+  const handleChange = (e) => {
+    const valor = e.target.value;
+    setObservacao(valor);
+
+    if (valor.length > 200) {
+      setError("Máximo de 200 caracteres atingido.");
+      return;
+    } else {
+      setError(null);
     }
+
+    // Limpa o timeout anterior
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    // Define novo timeout de 500ms
+    debounceRef.current = setTimeout(() => {
+      enviarObservacao(valor);
+    }, 500);
   };
 
+  const enviarObservacao = async (valor) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/observacao-pedido/${pedido.codigo}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ observacao: valor }),
+      });
+
+      if (!response.ok) throw new Error("Erro ao salvar observação");
+
+      const resultado = await response.json();
+      setStatus("Observação salva com sucesso!");
+      console.log("Pedido atualizado:", resultado);
+    } catch (err) {
+      setStatus("Erro ao salvar observação.");
+      console.error(err);
+    }
+  };
+  
   const atualizarCampo = async (campo) => {
     if (!campo) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/atualizar-pedido/${pedido.codigo}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [campo]: formData[campo] }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/atualizar-pedido/${pedido.codigo}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [campo]: formData[campo] }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -99,19 +163,26 @@ function CardPedido({ pedido, onUpdatePedido }) {
   };
 
   const confirmarMaquinarioEIniciar = async () => {
-    const idMaquinario = Number(maquinarioSelecionado);
-    if (!maquinarioSelecionado || isNaN(idMaquinario) || idMaquinario <= 0) {
-      setError("Selecione um maquinário válido antes de iniciar o pedido.");
+    if (!maquinarioSelecionado || maquinarioSelecionado.length === 0) {
+      setError("Selecione pelo menos um maquinário antes de iniciar o pedido.");
       return;
     }
 
     try {
+      // Primeiro, inicia o pedido
       await fazerRequisicao("iniciar-pedido", "POST");
-      const responseVinculacao = await fetch(`${API_BASE_URL}/vincular-maquinario/${pedido.codigo}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ maquinarioId: idMaquinario }),
-      });
+
+      // Depois, vincula todos os maquinários
+      const responseVinculacao = await fetch(
+        `${API_BASE_URL}/vincular-maquinario/${pedido.codigo}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            maquinarioIds: maquinarioSelecionado.map(Number),
+          }),
+        }
+      );
 
       if (!responseVinculacao.ok) {
         const errorData = await responseVinculacao.json();
@@ -119,7 +190,8 @@ function CardPedido({ pedido, onUpdatePedido }) {
       }
 
       const pedidoAtualizado = await responseVinculacao.json();
-      window.location.reload();
+      if (onUpdatePedido) onUpdatePedido(pedidoAtualizado);
+      setShowModal(false);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -134,13 +206,22 @@ function CardPedido({ pedido, onUpdatePedido }) {
         <input
           type={tipo}
           value={formData[campo]}
-          onChange={(e) => setFormData({ ...formData, [campo]: tipo === "number" ? Number(e.target.value) : e.target.value })}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              [campo]:
+                tipo === "number" ? Number(e.target.value) : e.target.value,
+            })
+          }
           onBlur={() => atualizarCampo(campo)}
           autoFocus
           className="form-control d-inline-block w-auto"
         />
       ) : (
-        <span style={{ cursor: "pointer" }} onClick={() => setEditandoCampo(campo)}>
+        <span
+          style={{ cursor: "pointer" }}
+          onClick={() => setEditandoCampo(campo)}
+        >
           {formData[campo] || <em>Editar...</em>}
         </span>
       )}
@@ -155,13 +236,18 @@ function CardPedido({ pedido, onUpdatePedido }) {
             <input
               type="number"
               value={formData.codigo}
-              onChange={(e) => setFormData({ ...formData, codigo: Number(e.target.value) })}
+              onChange={(e) =>
+                setFormData({ ...formData, codigo: Number(e.target.value) })
+              }
               onBlur={() => atualizarCampo("codigo")}
               autoFocus
               className="form-control d-inline-block w-auto"
             />
           ) : (
-            <span style={{ cursor: "pointer" }} onClick={() => setEditandoCampo("codigo")}>
+            <span
+              style={{ cursor: "pointer" }}
+              onClick={() => setEditandoCampo("codigo")}
+            >
               Pedido #{formData.codigo}
             </span>
           )}
@@ -172,19 +258,46 @@ function CardPedido({ pedido, onUpdatePedido }) {
       {renderEditableCampo("tipo", "Tipo")}
       {renderEditableCampo("quantidade", "Quantidade", "number")}
 
-      <p><strong>Data:</strong> {new Date(localPedido.dataAtual).toLocaleDateString("pt-BR")}</p>
-      <p><strong>Maquinário(s):</strong> 
-        {localPedido.maquinarios?.length > 0 
-          ? localPedido.maquinarios.map(m => m.maquinario.nome).join(", ") 
-          : "Não vinculado"}
+      <p>
+        <strong>Data:</strong>{" "}
+        {new Date(localPedido.dataAtual).toLocaleDateString("pt-BR")}
       </p>
-      <p><strong>Funcionário(s):</strong> 
-        {localPedido.funcionarios?.length > 0
-          ? localPedido.funcionarios.map(f => f.nome).join(", ")  
-          : "Não vinculado"}
+      <p>
+        <strong>Maquinário(s):</strong>{" "}
+        <span
+          style={{ cursor: "pointer", textDecoration: "underline" }}
+          onClick={() => {
+            setMaquinariosSelecionadosEdicao(
+              localPedido.maquinarios?.map(
+                (m) => m.maquinarioId || m.maquinario.id
+              ) || []
+            );
+            setShowEditMaquinarioModal(true);
+          }}
+        >
+          {localPedido.maquinarios?.length > 0
+            ? localPedido.maquinarios.map((m) => m.maquinario.nome).join(", ")
+            : "Não vinculado"}
+        </span>
       </p>
 
-      {error && <div className="alert alert-danger mt-2">{error}</div>}
+      <p>
+        <strong>Funcionário(s):</strong>
+        {localPedido.funcionarios?.length > 0
+          ? localPedido.funcionarios.map((f) => f.nome).join(", ")
+          : "Não vinculado"}
+      </p>
+      <p>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Digite aqui as observações, se houver..."
+          value={observacao}
+          onChange={handleChange}
+        />
+      </p>
+      {error && <small style={{ color: "red" }}>{error}</small>}
+      {status && <small style={{ color: "green" }}>{status}</small>}
 
       <div className="d-flex gap-2">
         <button
@@ -218,36 +331,151 @@ function CardPedido({ pedido, onUpdatePedido }) {
       </div>
 
       {showModal && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Selecionar Maquinário</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
               </div>
-              <div className="modal-body">
-                <p>Escolha o maquinário para este pedido:</p>
-                <select
-                  className="form-select"
-                  onChange={(e) => setMaquinarioSelecionado(e.target.value)}
-                  value={maquinarioSelecionado}
+              <select
+                className="form-select"
+                multiple
+                onChange={(e) => {
+                  const selectedValues = Array.from(
+                    e.target.selectedOptions,
+                    (option) => option.value
+                  );
+                  setMaquinarioSelecionado(selectedValues);
+                }}
+                value={maquinarioSelecionado}
+                disabled={isLoading}
+              >
+                <option value="">Selecione um ou mais maquinários</option>
+                {maquinarios.map((maquinario) => (
+                  <option key={maquinario.id} value={maquinario.id}>
+                    {maquinario.nome}
+                  </option>
+                ))}
+              </select>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
                   disabled={isLoading}
                 >
-                  <option value="">Selecione um maquinário</option>
-                  {maquinarios.map((maquinario) => (
-                    <option key={maquinario.id} value={maquinario.id}>
-                      {maquinario.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)} disabled={isLoading}>
                   Cancelar
                 </button>
-                <button type="button" className="btn btn-primary" onClick={confirmarMaquinarioEIniciar} disabled={isLoading || !maquinarioSelecionado}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={confirmarMaquinarioEIniciar}
+                  disabled={isLoading || !maquinarioSelecionado}
+                >
                   {isLoading ? "Carregando..." : "Confirmar e Iniciar"}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showEditMaquinarioModal && (
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Editar Maquinários</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowEditMaquinarioModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                {maquinarios.map((m) => (
+                  <div key={m.id} className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      value={m.id}
+                      id={`maquinario-${m.id}`}
+                      checked={maquinariosSelecionadosEdicao.includes(m.id)}
+                      onChange={(e) => {
+                        const id = Number(e.target.value);
+                        setMaquinariosSelecionadosEdicao((prev) =>
+                          e.target.checked
+                            ? [...prev, id]
+                            : prev.filter((mid) => mid !== id)
+                        );
+                      }}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor={`maquinario-${m.id}`}
+                    >
+                      {m.nome}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowEditMaquinarioModal(false)}
+                >
+                  Cancelar
+                </button>
+                <button
+  className="btn btn-success"
+  disabled={isLoading}
+  onClick={async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/editar-maquinarios/${pedido.codigo}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ maquinarioIds: maquinariosSelecionadosEdicao }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Erro ao editar maquinários");
+      }
+
+      const pedidoAtualizado = await response.json(); // 👈 garante que você está recebendo o pedido atualizado
+      setLocalPedido(pedidoAtualizado); // 👈 atualiza o estado local do pedido
+
+      if (onUpdatePedido) {
+        onUpdatePedido(pedidoAtualizado); // 👈 notifica o componente pai
+        window.location.reload(); // 👈 recarrega a página para refletir as mudanças
+      }
+
+      setShowEditMaquinarioModal(false); // 👈 fecha o modal
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }}
+>
+  {isLoading ? "Salvando..." : "Salvar"}
+</button>
+
               </div>
             </div>
           </div>

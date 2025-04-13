@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
+import FiltroPedidos from './FiltroPedidos';
 
-function NovoPedido({ adicionarPedido }) {
+function NovoPedido({ adicionarPedido, filtroCodigo, setFiltroCodigo }) {
   const [modalAberto, setModalAberto] = useState(false);
 
   return (
@@ -9,6 +10,8 @@ function NovoPedido({ adicionarPedido }) {
       <button className="btn btn-outline-primary" onClick={() => setModalAberto(true)}>
         Novo
       </button>
+
+
 
       {modalAberto && (
         <Modal 

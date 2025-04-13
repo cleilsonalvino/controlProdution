@@ -244,7 +244,13 @@ function ProducaoEstamparia() {
       </td>
       <td>{formatTime(pedido.horaFinal)}</td>
       <td>{pedido.observacoes || "-"}</td>
-      <td>{pedido.maquinario?.nome || "-"}</td>
+      <td>
+  {pedido.maquinarios && pedido.maquinarios.length > 0
+    ? pedido.maquinarios.map((m) => m.maquinario.nome).join(", ")
+    : "-"}
+</td>
+
+
       <td>{formatMinutes(pedido.tempoProduzindo)}</td>
       <td>{formatMinutes(pedido.tempoTotal)}</td>
       <td>
@@ -282,6 +288,34 @@ function ProducaoEstamparia() {
           </button>
         </div>
       </div>
+
+      <h2 className="text-center">Pedidos em Produção</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Data de Início</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Funcionário</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tabelaPedidos
+            .filter((pedido) => pedido.situacao === "Em andamento" || pedido.situacao === "Pausado" || pedido.situacao === "Pendente")
+            .map((pedido) => (
+              <tr key={pedido.codigo}>
+                <td>{pedido.codigo}</td>
+                <td>{formatDateTime(pedido.dataAtual)}</td>
+                <td>{pedido.tipo}</td>
+                <td>{pedido.quantidade}</td>
+                <td>{pedido.funcionarios?.map((f) => f.nome).join(", ")}</td>
+                <td>{pedido.situacao}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
 
       <GraficoDePedidos
         dataSelecionada={dataSelecionada}
