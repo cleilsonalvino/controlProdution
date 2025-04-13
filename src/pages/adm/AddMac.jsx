@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Modal from 'react-modal';
 
+const API_BASE_URL = "http://localhost:3000";
+
 // Configuração de acessibilidade para o react-modal
 Modal.setAppElement('#root');
 
@@ -28,7 +30,7 @@ function AddMaquinario() {
         console.log("Enviando:", { nome }); // 🔥 Depuração
 
         try {
-            const response = await fetch('http://3.17.153.198:3000/adicionar-maquinario', {
+            const response = await fetch(`${API_BASE_URL}/adicionar-maquinario`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome }),

@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import AddMaquinario from "./AddMac";
 
+const API_BASE_URL = "http://localhost:3000";
+
 function ListaMaquinarios() {
   const [maquinarios, setMaquinarios] = useState([]);
 
   useEffect(() => {
     async function listarMaquinarios() {
       try {
-        const response = await fetch("http://3.17.153.198:3000/maquinarios");
+        const response = await fetch(`${API_BASE_URL}/maquinarios`);
         if (!response.ok) throw new Error("Erro ao listar maquinários");
         const data = await response.json();
         setMaquinarios(data);
@@ -24,7 +26,7 @@ function ListaMaquinarios() {
 
     try {
       const response = await fetch(
-        `http://3.17.153.198:3000/api/deletar-maquinario/${id}`,
+        `${API_BASE_URL}/api/deletar-maquinario/${id}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },

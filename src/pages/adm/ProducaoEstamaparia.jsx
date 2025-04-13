@@ -3,6 +3,8 @@ import "../Administrador.css";
 import GraficoDePedidos from "./Graficos";
 import FiltroPedidos from "../../components/FiltroPedidos";
 
+const API_BASE_URL = "http://localhost:3000";
+
 // Utilitários
 const formatDateTime = (date) =>
   date
@@ -50,7 +52,7 @@ function ProducaoEstamparia() {
   async function fetchTabelaPedidos() {
     try {
       setLoading(true);
-      const response = await fetch("http://3.17.153.198:3000/tabela-pedidos");
+      const response = await fetch(`${API_BASE_URL}/tabela-pedidos`);
       if (!response.ok) throw new Error("Erro ao buscar a tabela de pedidos");
       const data = await response.json();
       setTabelaPedidos(data);
@@ -70,7 +72,7 @@ function ProducaoEstamparia() {
     try {
       setDeletando(codigo);
       const response = await fetch(
-        `http://3.17.153.198:3000/deletar-pedido/${codigo}`,
+        `${API_BASE_URL}/deletar-pedido/${codigo}`,
         {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+const API_BASE_URL = "http://localhost:3000";
+
 function Modal({ onClose }) {
   // Estado do pedido
   const [pedido, setPedido] = useState({
@@ -17,7 +19,7 @@ function Modal({ onClose }) {
   useEffect(() => {
     async function fetchFuncionarios() {
       try {
-        const response = await fetch("http://3.17.153.198:3000/funcionarios", {
+        const response = await fetch(`${API_BASE_URL}/funcionarios`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -37,7 +39,7 @@ function Modal({ onClose }) {
   // Adicionar pedido
   const handleAdicionarPedido = async (pedido) => {
     try {
-      const response = await fetch("http://3.17.153.198:3000/adicionar-pedido", {
+      const response = await fetch(`${API_BASE_URL}/adicionar-pedido`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pedido),

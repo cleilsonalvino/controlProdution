@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import AddFunc from './AddFunc';
 
+const API_BASE_URL = "http://localhost:3000";
+
 function ListaFuncionarios() {
   const [funcionarios, setFuncionarios] = useState([]);
 
   async function fetchFuncionarios() {
     try {
-      const response = await fetch('http://3.17.153.198:3000/funcionarios');
+      const response = await fetch(`${API_BASE_URL}/funcionarios`);
       if (!response.ok) throw new Error('Erro ao buscar os funcionários');
       const data = await response.json();
       setFuncionarios(data);
@@ -21,7 +23,7 @@ function ListaFuncionarios() {
 
   async function deletarFuncionario(id) {
     try {
-      const response = await fetch(`http://3.17.153.198:3000/deletar-funcionario/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/deletar-funcionario/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });

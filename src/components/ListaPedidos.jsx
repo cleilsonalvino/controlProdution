@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import CardPedido from "./CardPedido";
 
+const API_BASE_URL = "http://localhost:3000";
+
 function ListaPedidos() {
   const [pedidos, setPedidos] = useState([]);  // Estado para armazenar a lista de pedidos
 
@@ -8,7 +10,7 @@ function ListaPedidos() {
   useEffect(() => {
     async function listarPedidos() {
       try {
-        const response = await fetch("http://3.17.153.198:3000/pedidos");  // Altere para a URL correta da sua API
+        const response = await fetch(`${API_BASE_URL}/pedidos`);  // Altere para a URL correta da sua API
         const data = await response.json();
         setPedidos(data);  // Atualiza o estado com a lista de pedidos
       } catch (error) {

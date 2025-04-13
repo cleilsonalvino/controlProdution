@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import Modal from 'react-modal';
 
+const API_BASE_URL = "http://localhost:3000";
+
 Modal.setAppElement('#root');
 
 function AddFunc() {
@@ -17,7 +19,7 @@ function AddFunc() {
         const nome = nomeRef.current.value;
         const setor = setorRef.current.value;
 
-        const response = await fetch('http://3.17.153.198:3000/adicionar-funcionario', {
+        const response = await fetch(`${API_BASE_URL}/adicionar-funcionario`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
