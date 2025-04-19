@@ -123,7 +123,7 @@ function App() {
 
         <p className="text-center mt-5">
           <small>
-            Desenvolvido por <a href="https://www.cleilsonalvino.com">Cleilson Alvino</a>
+            Desenvolvido por <a href="https://www.cleilsonalvino.com">Cleilson Alvino</a> v2.00
           </small>
         </p>
       </div>
