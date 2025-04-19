@@ -255,6 +255,15 @@ function CardPedido({ pedido, onUpdatePedido }) {
     </p>
   );
 
+  const formatarHora = (hora) => {
+    const data = new Date(hora);
+    return data.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+  
+
   return (
     <div className="card boxPedido mt-4 mb-4 p-3">
       <div className="container d-flex justify-content-between align-items-center mb-3">
@@ -279,6 +288,7 @@ function CardPedido({ pedido, onUpdatePedido }) {
             </span>
           )}
         </h3>
+        <span>Inicio: {formatarHora(localPedido.horaInicio)}</span>
         <span className="text-warning">{localPedido.situacao}</span>
       </div>
 
