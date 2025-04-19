@@ -135,8 +135,7 @@ const GraficoProducaoDiaria = ({ pedidos }) => {
             className="form-control me-2"
             value={dataSelecionadaGrafico}
             onChange={(e) => {
-              setDataSelecionadaGrafico(e.target.value);
-              console.log("Data selecionada:", e.target.value);
+              setDataSelecionadaGrafico(e.target.value)
             }}
           />
         </div>
