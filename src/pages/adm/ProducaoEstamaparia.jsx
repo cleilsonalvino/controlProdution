@@ -3,6 +3,8 @@ import "../Administrador.css";
 import GraficoDePedidos from "./Graficos";
 import FiltroPedidos from "../../components/FiltroPedidos";
 
+
+
 const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
 
 // Utilitários
@@ -317,12 +319,7 @@ function ProducaoEstamparia() {
         </tbody>
       </table>
 
-      <GraficoDePedidos
-        dataSelecionada={dataSelecionada}
-        fetchTabelaPedidos={fetchTabelaPedidos}
-        pedidos={pedidosFiltrados}
-        setTabelaPedidos={setTabelaPedidos}
-      />
+      <GraficoDePedidos pedidos={pedidosFiltrados} />
     </div>
   );
 }
