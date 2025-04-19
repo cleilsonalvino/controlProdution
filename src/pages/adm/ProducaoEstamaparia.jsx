@@ -287,32 +287,34 @@ function ProducaoEstamparia() {
       </div>
 
       <h2 className="text-center">Pedidos em Produção</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Data de Início</th>
-            <th>Tipo</th>
-            <th>Quantidade</th>
-            <th>Funcionário</th>
-            <th>Situação</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tabelaPedidos
-            .filter((pedido) => pedido.situacao === "Em andamento" || pedido.situacao === "Pausado" || pedido.situacao === "Pendente")
-            .map((pedido) => (
-              <tr key={pedido.codigo}>
-                <td>{pedido.codigo}</td>
-                <td>{formatDateTime(pedido.dataAtual)}</td>
-                <td>{pedido.tipo}</td>
-                <td>{pedido.quantidade}</td>
-                <td>{pedido.funcionarios?.map((f) => f.nome).join(", ")}</td>
-                <td>{pedido.situacao}</td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+      <div className="table-responsive">
+        <table className="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Data de Início</th>
+              <th>Tipo</th>
+              <th>Quantidade</th>
+              <th>Funcionário</th>
+              <th>Situação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tabelaPedidos
+              .filter((pedido) => pedido.situacao === "Em andamento" || pedido.situacao === "Pausado" || pedido.situacao === "Pendente")
+              .map((pedido) => (
+                <tr key={pedido.codigo}>
+                  <td>{pedido.codigo}</td>
+                  <td>{formatDateTime(pedido.dataAtual)}</td>
+                  <td>{pedido.tipo}</td>
+                  <td>{pedido.quantidade}</td>
+                  <td>{pedido.funcionarios?.map((f) => f.nome).join(", ")}</td>
+                  <td>{pedido.situacao}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
 
       <GraficoDePedidos pedidos={pedidosFiltrados} />
     </div>
