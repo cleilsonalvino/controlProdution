@@ -196,6 +196,7 @@ function Modal({ onClose }) {
                     <option value="">Selecione</option>
                     <option value="TRADICIONAL">TRADICIONAL</option>
                     <option value="MANGA LONGA">MANGA LONGA</option>
+                    <option value="KIT UNIFORME">KIT UNIFORME</option>
                     <option value="REGATA">REGATA</option>
                     <option value="PARCIAL - FRENTE">PARCIAL - FRENTE</option>
                     <option value="PARCIAL - COSTA">PARCIAL - COSTA</option>

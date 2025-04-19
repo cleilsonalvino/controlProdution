@@ -3,8 +3,6 @@ import "../Administrador.css";
 import GraficoDePedidos from "./Graficos";
 import FiltroPedidos from "../../components/FiltroPedidos";
 
-
-
 const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
 
 // Utilitários
@@ -124,7 +122,7 @@ function ProducaoEstamparia() {
         placeholder="Digite o código..."
       />
 
-      <div className="table-responsive">
+      <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
         <table className="table table-striped table-hover">
           <thead>
             <tr>
@@ -146,149 +144,146 @@ function ProducaoEstamparia() {
             </tr>
           </thead>
           <tbody>
-          {pedidosPaginados
-  .sort((a, b) => {
-    const ordemSituacoes = ["Em andamento", "Pausado", "Pendente"];
-    
-    const situacaoA = a.situacao || "";
-    const situacaoB = b.situacao || "";
+            {pedidosPaginados
+              .sort((a, b) => {
+                const ordemSituacoes = ["Em andamento", "Pausado", "Pendente"];
 
-    // Comparar as situações, colocando as prioritárias no início
-    const indiceSituacaoA = ordemSituacoes.indexOf(situacaoA);
-    const indiceSituacaoB = ordemSituacoes.indexOf(situacaoB);
+                const situacaoA = a.situacao || "";
+                const situacaoB = b.situacao || "";
 
-    if (indiceSituacaoA === -1) return 1; // Se não for uma situação prioritária, coloca depois
-    if (indiceSituacaoB === -1) return -1; // Se não for uma situação prioritária, coloca depois
+                // Comparar as situações, colocando as prioritárias no início
+                const indiceSituacaoA = ordemSituacoes.indexOf(situacaoA);
+                const indiceSituacaoB = ordemSituacoes.indexOf(situacaoB);
 
-    return indiceSituacaoA - indiceSituacaoB; // Caso contrário, ordena por prioridade
-  })
-  .map((pedido) => (
-    <tr key={pedido.codigo}>
-      <td>{pedido.codigo}</td>
-      <td>{formatDateTime(pedido.dataAtual)}</td>
-      <td className="text-capitalize">
-        <strong>{pedido.tipo}</strong>
+                if (indiceSituacaoA === -1) return 1; // Se não for uma situação prioritária, coloca depois
+                if (indiceSituacaoB === -1) return -1; // Se não for uma situação prioritária, coloca depois
 
-        {pedido.tipo === "PAINEL" &&
-          Array.isArray(pedido.metragem) &&
-          pedido.metragem.map((m, i) => (
-            <div key={i} style={{ whiteSpace: "nowrap" }}>
-              {m}
-            </div>
-          ))}
+                return indiceSituacaoA - indiceSituacaoB; // Caso contrário, ordena por prioridade
+              })
+              .map((pedido) => (
+                <tr key={pedido.codigo}>
+                  <td>{pedido.codigo}</td>
+                  <td>{formatDateTime(pedido.dataAtual)}</td>
+                  <td className="text-capitalize">
+                    <strong>{pedido.tipo}</strong>
 
-        {pedido.tipo === "LENÇOL" && pedido.tipoDetalhes?.lencol && (
-          <div style={{ whiteSpace: "nowrap" }}>
-            {pedido.tipoDetalhes.lencol.tipo && (
-              <>
-                Tipo: {pedido.tipoDetalhes.lencol.tipo}
-                <br />
-              </>
-            )}
-            Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}
-            <br />
-            Fronha: {pedido.tipoDetalhes.lencol.quantidadeFronha}
-            <br />
-            Cortina:{" "}
-            {pedido.tipoDetalhes.lencol.quantidadeCortina > 0
-              ? pedido.tipoDetalhes.lencol.quantidadeCortina
-              : "-"}
-          </div>
-        )}
+                    {pedido.tipo === "PAINEL" &&
+                      Array.isArray(pedido.metragem) &&
+                      pedido.metragem.map((m, i) => (
+                        <div key={i} style={{ whiteSpace: "nowrap" }}>
+                          {m}
+                        </div>
+                      ))}
 
-        {pedido.tipo === "CAMISA" && pedido.tipoDetalhes?.camisa && (
-          <div>
-            <div style={{ whiteSpace: "nowrap" }}>
-              {pedido.tipoDetalhes.camisa[0].tipo}
-            </div>
-          </div>
-        )}
+                    {pedido.tipo === "LENÇOL" && pedido.tipoDetalhes?.lencol && (
+                      <div style={{ whiteSpace: "nowrap" }}>
+                        {pedido.tipoDetalhes.lencol.tipo && (
+                          <>
+                            Tipo: {pedido.tipoDetalhes.lencol.tipo}
+                            <br />
+                          </>
+                        )}
+                        Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}
+                        <br />
+                        Fronha: {pedido.tipoDetalhes.lencol.quantidadeFronha}
+                        <br />
+                        Cortina:{" "}
+                        {pedido.tipoDetalhes.lencol.quantidadeCortina > 0
+                          ? pedido.tipoDetalhes.lencol.quantidadeCortina
+                          : "-"}
+                      </div>
+                    )}
 
-        {pedido.tipo === "OUTROS" &&
-          pedido.tipoDetalhes?.outrosTipos?.tipo && (
-            <div style={{ whiteSpace: "nowrap" }}>
-              {pedido.tipoDetalhes.outrosTipos.tipo}
-            </div>
-          )}
-      </td>
+                    {pedido.tipo === "CAMISA" && pedido.tipoDetalhes?.camisa && (
+                      <div>
+                        <div style={{ whiteSpace: "nowrap" }}>
+                          {pedido.tipoDetalhes.camisa[0].tipo}
+                        </div>
+                      </div>
+                    )}
 
-      <td>{pedido.quantidade}</td>
-      <td>
-        {pedido.funcionarios?.length
-          ? pedido.funcionarios.map((f, i) => (
-              <span key={f.id}>
-                {f.nome}
-                {i < pedido.funcionarios.length - 1 && ", "}
-              </span>
-            ))
-          : "Nenhum funcionário"}
-      </td>
-      <td>{pedido.situacao}</td>
-      <td>{formatTime(pedido.horaInicio)}</td>
-      <td>
-        {pedido.pausas?.length
-          ? pedido.pausas.map((p, i) => (
-              <div key={i}>⏸️{formatTime(p.horaPausa)}</div>
-            ))
-          : "-"}
-      </td>
-      <td>
-        {pedido.pausas?.length
-          ? pedido.pausas.map((p, i) => (
-              <div key={i}>
-                ▶️{" "}
-                {p.horaRetorno
-                  ? formatTime(p.horaRetorno)
-                  : "Em pausa..."}
-              </div>
-            ))
-          : "-"}
-      </td>
-      <td>{formatTime(pedido.horaFinal)}</td>
-      <td>{pedido.observacoes || "-"}</td>
-      <td>
-  {pedido.maquinarios && pedido.maquinarios.length > 0
-    ? pedido.maquinarios.map((m) => m.maquinario.nome).join(", ")
-    : "-"}
-</td>
+                    {pedido.tipo === "OUTROS" &&
+                      pedido.tipoDetalhes?.outrosTipos?.tipo && (
+                        <div style={{ whiteSpace: "nowrap" }}>
+                          {pedido.tipoDetalhes.outrosTipos.tipo}
+                        </div>
+                      )}
+                  </td>
 
-
-      <td>{formatMinutes(pedido.tempoProduzindo)}</td>
-      <td>{formatMinutes(pedido.tempoTotal)}</td>
-      <td>
-        <button
-          className="btn btn-danger btn-sm"
-          onClick={() => deletePedido(pedido.codigo)}
-          disabled={deletando === pedido.codigo}
-        >
-          {deletando === pedido.codigo ? "Deletando..." : "Deletar"}
-        </button>
-      </td>
-    </tr>
-  ))}
-
+                  <td>{pedido.quantidade}</td>
+                  <td>
+                    {pedido.funcionarios?.length
+                      ? pedido.funcionarios.map((f, i) => (
+                          <span key={f.id}>
+                            {f.nome}
+                            {i < pedido.funcionarios.length - 1 && ", "}
+                          </span>
+                        ))
+                      : "Nenhum funcionário"}
+                  </td>
+                  <td>{pedido.situacao}</td>
+                  <td>{formatTime(pedido.horaInicio)}</td>
+                  <td>
+                    {pedido.pausas?.length
+                      ? pedido.pausas.map((p, i) => (
+                          <div key={i}>⏸️{formatTime(p.horaPausa)}</div>
+                        ))
+                      : "-"}
+                  </td>
+                  <td>
+                    {pedido.pausas?.length
+                      ? pedido.pausas.map((p, i) => (
+                          <div key={i}>
+                            ▶️{" "}
+                            {p.horaRetorno
+                              ? formatTime(p.horaRetorno)
+                              : "Em pausa..."}
+                          </div>
+                        ))
+                      : "-"}
+                  </td>
+                  <td>{formatTime(pedido.horaFinal)}</td>
+                  <td>{pedido.observacoes || "-"}</td>
+                  <td>
+                    {pedido.maquinarios && pedido.maquinarios.length > 0
+                      ? pedido.maquinarios.map((m) => m.maquinario.nome).join(", ")
+                      : "-"}
+                  </td>
+                  <td>{formatMinutes(pedido.tempoProduzindo)}</td>
+                  <td>{formatMinutes(pedido.tempoTotal)}</td>
+                  <td>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => deletePedido(pedido.codigo)}
+                      disabled={deletando === pedido.codigo}
+                    >
+                      {deletando === pedido.codigo ? "Deletando..." : "Deletar"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
+      </div> {/* Fim da div com table-responsive */}
 
-        <div className="d-flex justify-content-between align-items-center mt-3">
-          <button
-            className="btn btn-outline-primary btn-sm"
-            onClick={() => setPaginaAtual((p) => Math.max(p - 1, 1))}
-            disabled={paginaAtual === 1}
-          >
-            Anterior
-          </button>
-          <span>
-            Página {paginaAtual} de {totalPaginas}
-          </span>
-          <button
-            className="btn btn-outline-primary btn-sm"
-            onClick={() => setPaginaAtual((p) => Math.min(p + 1, totalPaginas))}
-            disabled={paginaAtual === totalPaginas}
-          >
-            Próxima
-          </button>
-        </div>
+      <div className="d-flex justify-content-between align-items-center mt-3"> {/* Botões fora da tabela */}
+        <button
+          className="btn btn-outline-primary btn-sm"
+          onClick={() => setPaginaAtual((p) => Math.max(p - 1, 1))}
+          disabled={paginaAtual === 1}
+        >
+          Anterior
+        </button>
+        <span>
+          Página {paginaAtual} de {totalPaginas}
+        </span>
+        <button
+          className="btn btn-outline-primary btn-sm"
+          onClick={() => setPaginaAtual((p) => Math.min(p + 1, totalPaginas))}
+          disabled={paginaAtual === totalPaginas}
+        >
+          Próxima
+        </button>
       </div>
 
       <h2 className="text-center">Pedidos em Produção</h2>
