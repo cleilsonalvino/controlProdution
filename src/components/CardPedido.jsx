@@ -336,7 +336,7 @@ function CardPedido({ pedido, onUpdatePedido }) {
       {error && <small style={{ color: "red" }}>{error}</small>}
       {status && <small style={{ color: "green" }}>{status}</small>}
 
-      <div className="d-flex gap-2">
+      <div className="d-flex gap-2 flex-wrap justify-content-center ">
         <button
           className="btn btn-outline-danger"
           onClick={() => fazerRequisicao("finalizar-pedido", "POST")}
@@ -359,7 +359,7 @@ function CardPedido({ pedido, onUpdatePedido }) {
           {isLoading ? "Carregando..." : "Reiniciar"}
         </button>
         <button
-          className="btn btn-outline-primary"
+          className="btn btn-outline-primary w-100"
           onClick={() => setShowModal(true)}
           disabled={localPedido.situacao !== "Pendente" || isLoading}
         >
