@@ -115,6 +115,7 @@ function ProducaoEstamparia() {
       <button onClick={fetchTabelaPedidos} style={{ marginBottom: "10px" }}>
         Atualizar Tabela
       </button>
+      
       <FiltroPedidos
         label="Pesquisar por código do pedido"
         valor={filtroCodigo}

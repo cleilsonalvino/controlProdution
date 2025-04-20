@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const GraficoProducaoMensal = ({ pedidos }) => {
   const [anoSelecionado, setAnoSelecionado] = useState(new Date().getFullYear());
@@ -8,6 +10,7 @@ const GraficoProducaoMensal = ({ pedidos }) => {
   const [subtiposUnicos, setSubtiposUnicos] = useState([]);
   const [producaoMensal, setProducaoMensal] = useState([]);
   const tiposPrincipais = ["Todos", "CAMISA", "LENÇOL", "PAINEL", "OUTROS"];
+  const chartRef = useRef(null);
 
   useEffect(() => {
     const extrairSubtipos = (tipo) => {
@@ -53,27 +56,61 @@ const GraficoProducaoMensal = ({ pedidos }) => {
         meses[mes] += pedido.quantidade;
       }
     });
-    const dadosMensais = meses.map((quantidade, index) => ({ mes: `${index + 1}`.padStart(2, "0"), quantidade }));
+    const dadosMensais = meses.map((quantidade, index) => ({
+      mes: `${(index + 1).toString().padStart(2, "0")}`,
+      quantidade
+    }));
     setProducaoMensal(dadosMensais);
   }, [pedidos, anoSelecionado, tipoSelecionado, subtipoSelecionado]);
+
+  const exportarPDF = async () => {
+    const chartElement = chartRef.current;
+    if (!chartElement) return;
+  
+    const canvas = await html2canvas(chartElement);
+    const imgData = canvas.toDataURL("image/png");
+  
+    const doc = new jsPDF("p", "mm", "a4");
+    const titulo = `Relatório de Produção Mensal - ${anoSelecionado}`;
+    const tipo = tipoSelecionado !== "Todos" ? `Tipo: ${tipoSelecionado}` : "Todos os Tipos";
+    const subtipo = tipoSelecionado !== "Todos" && subtipoSelecionado !== "Todos" ? ` | Subtipo: ${subtipoSelecionado}` : "";
+  
+    const totalQuantidade = producaoMensal.reduce((acc, item) => acc + item.quantidade, 0);
+  
+    doc.setFontSize(16);
+    doc.text(titulo, 14, 20);
+  
+    doc.setFontSize(12);
+    doc.text(`${tipo}${subtipo}`, 14, 28);
+    doc.text(`Quantidade total: ${totalQuantidade}`, 14, 36);
+  
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const imgWidth = pageWidth - 28;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  
+    doc.addImage(imgData, "PNG", 14, 42, imgWidth, imgHeight);
+    doc.save(`producao_mensal_${anoSelecionado}.pdf`);
+  };
+  
 
   return (
     <div>
       <h4 className="text-center mb-3">Produção por Mês no Ano</h4>
+
       <div className="row justify-content-center mb-3">
         <div className="col-md-3">
-          <label className="form-label me-2">Ano:</label>
+          <label className="form-label">Ano:</label>
           <input
             type="number"
-            className="form-control me-2"
+            className="form-control"
             value={anoSelecionado}
             onChange={(e) => setAnoSelecionado(e.target.value)}
           />
         </div>
         <div className="col-md-3">
-          <label className="form-label me-2">Tipo:</label>
+          <label className="form-label">Tipo:</label>
           <select
-            className="form-select me-2"
+            className="form-select"
             value={tipoSelecionado}
             onChange={(e) => setTipoSelecionado(e.target.value)}
           >
@@ -83,7 +120,7 @@ const GraficoProducaoMensal = ({ pedidos }) => {
           </select>
         </div>
         <div className="col-md-3">
-          <label className="form-label me-2">Subtipo:</label>
+          <label className="form-label">Subtipo:</label>
           <select
             className="form-select"
             value={subtipoSelecionado}
@@ -95,16 +132,24 @@ const GraficoProducaoMensal = ({ pedidos }) => {
             ))}
           </select>
         </div>
+        <div className="col-md-3 d-flex align-items-end">
+          <button onClick={exportarPDF} className="btn btn-danger w-100 mt-3">
+            Exportar PDF
+          </button>
+        </div>
       </div>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={producaoMensal}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="mes" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="quantidade" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer>
+
+      <div ref={chartRef} style={{ backgroundColor: "white", padding: "10px" }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={producaoMensal}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="mes" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="quantidade" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
