@@ -1,11 +1,41 @@
+@font-face {
+  font-family: 'Poppins-Medium';
+  src: url('/Poppins-Medium.ttf') format('truetype');
+}
+
 *{
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif, sans-serif;
+  font-family: 'Poppins-Medium' ,Arial, Helvetica, sans-serif, sans-serif;
 }
 
 body, html {
+  background-image: linear-gradient(65deg, #004E89, #000F08);
+  background-repeat: no-repeat;
   overflow-x: hidden;
   background-color: #fff;
+  height: 100%;
+  color: #E2EF70;
 }
+
+.card {
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px 0 rgba(255, 255, 255, 0.473);
+  color: #2c3100;
+}
+
+.modal{
+  background-color: #004e896b;
+  color: #000000;
+}
+
+.navbar{
+  background-color: #669BBC;
+  color: #ffffff;
+}
+
+.navbar ul li a{
+  color: #ffffff;
+}
+

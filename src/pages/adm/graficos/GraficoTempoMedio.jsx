@@ -159,8 +159,8 @@ const GraficoTempoMedio = ({ pedidos }) => {
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={dadosGrafico}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
+          <XAxis dataKey="name" style={{fill: "#E2EF70"}} />
+          <YAxis style={{fill: "#E2EF70"}}/>
           <Tooltip
             formatter={(value, name) =>
               [`${formatarTempo(value)} (hh:mm:ss)`, name === "tempoMedio" ? "Tempo Médio/Unidade" : "Tempo Estimado Total"]

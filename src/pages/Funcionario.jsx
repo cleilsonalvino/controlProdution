@@ -11,6 +11,7 @@ function Funcionario() {
     setPedidos([...pedidos, novoPedido]); // Adiciona o novo pedido à lista
   };
 
+
   return (
     <div className="container-md">
       <h1 className='text-center m-4'>Lista de Pedidos</h1>

@@ -260,6 +260,9 @@ function CardPedido({ pedido, onUpdatePedido }) {
     return data.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      
     });
   };
   
@@ -288,7 +291,7 @@ function CardPedido({ pedido, onUpdatePedido }) {
             </span>
           )}
         </h3>
-        <span>Inicio: {formatarHora(localPedido.horaInicio)}</span>
+        <span> {formatarHora(localPedido.horaInicio)}</span>
         <span className="text-warning">{localPedido.situacao}</span>
       </div>
 
