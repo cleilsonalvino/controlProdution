@@ -2,12 +2,13 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import './NavBar.css';
 
+
 function NavBar() {
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
+    <nav className="navbar navbar-expand-lg navbar-light shadow-sm mb-4">
       <div className="container-fluid">
         {/* Início - sempre à esquerda */}
-        <NavLink className="navbar-brand" to="/dashboard">Início</NavLink>
+        <NavLink className="navbar-brand text-white" to="/dashboard">Início</NavLink>
 
         {/* Botão hamburguer à direita */}
         <button

@@ -124,7 +124,7 @@ function ProducaoEstamparia() {
       />
 
       <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
-        <table className="table table-striped table-hover">
+        <table className="table-striped table-hover">
           <thead>
             <tr>
               <th>Código</th>
@@ -289,8 +289,8 @@ function ProducaoEstamparia() {
 
       <h2 className="text-center">Pedidos em Produção</h2>
       <div className="table-responsive">
-        <table className="table table-striped table-bordered">
-          <thead>
+        <table>
+          <thead >
             <tr>
               <th>Código</th>
               <th>Data de Início</th>

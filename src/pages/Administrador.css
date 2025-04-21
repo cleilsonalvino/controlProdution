@@ -1,26 +1,23 @@
 
-table {
+table, thead, tbody {
     font-family: Arial, sans-serif;
     font-size: small;
     border-collapse: collapse;
     margin: 1rem auto;
+    background-color: #002541b7;
 }
 
 table th, table td {
-    border: 1px solid #ddd;
+    border: 1px solid #cacaca;
     padding: 0.75rem;
     text-align: left;
 }
 
 table th {
-    background-color: #979797;
     color: white;
 }
 
-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
 table tr:hover {
-    background-color: #f1f1f1;
+    background-color: #003a69b7; /* Uma cor ligeiramente mais escura ou diferente */
+    cursor: pointer; /* Opcional: muda o cursor para indicar que a linha é interativa */
 }
