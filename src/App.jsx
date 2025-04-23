@@ -125,7 +125,7 @@ function App() {
           <small>
             Desenvolvido por <a href="https://www.cleilsonalvino.com">Cleilson Alvino</a> 
             <br />
-            v2.00
+            v2.25
           </small>
         </p>
       </div>
