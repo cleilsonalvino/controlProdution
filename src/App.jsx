@@ -13,6 +13,7 @@ import ProducaoCortePapel from "./pages/adm/ProducaoCortePapel";
 import ProducaoEmbalagem from "./pages/adm/ProducaoEmbalagem";
 import ProducaoCorteTecido from "./pages/adm/ProducaoCorteTecido";
 import ProducaoCostura from "./pages/adm/ProducaoCostura";
+import EditarPedido from "./pages/adm/EditarPedido";
 
 function App() {
   return (
@@ -91,6 +92,17 @@ function App() {
               <>
                 <NavBar />
                 <ProducaoCostura />
+              </>
+            }
+          />
+
+          {/*rota para edicao de pedido*/}
+          <Route
+            path="/administrador/editar-pedido/:codigo"
+            element={
+              <>
+                <NavBar />
+                <EditarPedido />
               </>
             }
           />
