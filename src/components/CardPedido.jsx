@@ -255,17 +255,16 @@ function CardPedido({ pedido, onUpdatePedido }) {
     </p>
   );
 
-  const formatarHora = (hora) => {
-    const data = new Date(hora);
-    return data.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-      
-    });
-  };
-  
+const formatarHora = (date) => {
+  if (!date) return "-";
+
+  // Cria a data a partir da string fornecida no formato ISO (UTC)
+  const dateObj = new Date(date);
+
+  // Formata a hora sem aplicar o fuso horário local
+  return dateObj.toISOString().slice(11, 19); // Exibe apenas as horas, minutos e segundos (HH:MM:SS)
+};
+
 
   return (
     <div className="card boxPedido mt-4 mb-4 p-3">

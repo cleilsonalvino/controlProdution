@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "../Administrador.css";
 import GraficoDePedidos from "./Graficos";
 import FiltroPedidos from "../../components/FiltroPedidos";
@@ -20,16 +20,17 @@ const formatDateTime = (date) =>
       })
     : "-";
 
-const formatTime = (date) =>
-  date
-    ? new Date(date).toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: "America/Sao_Paulo",
-      })
-    : "-";
+const formatTime = (date) => {
+  if (!date) return "-";
+
+  // Cria a data a partir da string fornecida no formato ISO (UTC)
+  const dateObj = new Date(date);
+
+  // Formata a hora sem aplicar o fuso horário local
+  return dateObj.toISOString().slice(11, 19); // Exibe apenas as horas, minutos e segundos (HH:MM:SS)
+};
+
+
 
 const formatMinutes = (minutes) => (minutes != null ? `${minutes} min` : "-");
 
@@ -110,20 +111,20 @@ function ProducaoEstamparia() {
   return (
     <div className="tabela-container p-4">
       <a href="/funcionario">Funcionário</a>
-
       <h1>Dados de Produção - Estamparia</h1>
       <button onClick={fetchTabelaPedidos} style={{ marginBottom: "10px" }}>
         Atualizar Tabela
       </button>
-      
       <FiltroPedidos
         label="Pesquisar por código do pedido"
         valor={filtroCodigo}
         aoMudar={setFiltroCodigo}
         placeholder="Digite o código..."
       />
-
-      <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
+      <div
+        className="table-responsive"
+        style={{ maxHeight: "400px", overflowY: "auto" }}
+      >
         <table className="table-striped table-hover">
           <thead>
             <tr>
@@ -176,32 +177,34 @@ function ProducaoEstamparia() {
                         </div>
                       ))}
 
-                    {pedido.tipo === "LENÇOL" && pedido.tipoDetalhes?.lencol && (
-                      <div style={{ whiteSpace: "nowrap" }}>
-                        {pedido.tipoDetalhes.lencol.tipo && (
-                          <>
-                            Tipo: {pedido.tipoDetalhes.lencol.tipo}
-                            <br />
-                          </>
-                        )}
-                        Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}
-                        <br />
-                        Fronha: {pedido.tipoDetalhes.lencol.quantidadeFronha}
-                        <br />
-                        Cortina:{" "}
-                        {pedido.tipoDetalhes.lencol.quantidadeCortina > 0
-                          ? pedido.tipoDetalhes.lencol.quantidadeCortina
-                          : "-"}
-                      </div>
-                    )}
-
-                    {pedido.tipo === "CAMISA" && pedido.tipoDetalhes?.camisa && (
-                      <div>
+                    {pedido.tipo === "LENÇOL" &&
+                      pedido.tipoDetalhes?.lencol && (
                         <div style={{ whiteSpace: "nowrap" }}>
-                          {pedido.tipoDetalhes.camisa[0].tipo}
+                          {pedido.tipoDetalhes.lencol.tipo && (
+                            <>
+                              Tipo: {pedido.tipoDetalhes.lencol.tipo}
+                              <br />
+                            </>
+                          )}
+                          Lençol: {pedido.tipoDetalhes.lencol.quantidadeLencol}
+                          <br />
+                          Fronha: {pedido.tipoDetalhes.lencol.quantidadeFronha}
+                          <br />
+                          Cortina:{" "}
+                          {pedido.tipoDetalhes.lencol.quantidadeCortina > 0
+                            ? pedido.tipoDetalhes.lencol.quantidadeCortina
+                            : "-"}
                         </div>
-                      </div>
-                    )}
+                      )}
+
+                    {pedido.tipo === "CAMISA" &&
+                      pedido.tipoDetalhes?.camisa && (
+                        <div>
+                          <div style={{ whiteSpace: "nowrap" }}>
+                            {pedido.tipoDetalhes.camisa[0].tipo}
+                          </div>
+                        </div>
+                      )}
 
                     {pedido.tipo === "OUTROS" &&
                       pedido.tipoDetalhes?.outrosTipos?.tipo && (
@@ -247,7 +250,9 @@ function ProducaoEstamparia() {
                   <td>{pedido.observacoes || "-"}</td>
                   <td>
                     {pedido.maquinarios && pedido.maquinarios.length > 0
-                      ? pedido.maquinarios.map((m) => m.maquinario.nome).join(", ")
+                      ? pedido.maquinarios
+                          .map((m) => m.maquinario.nome)
+                          .join(", ")
                       : "-"}
                   </td>
                   <td>{formatMinutes(pedido.tempoProduzindo)}</td>
@@ -261,13 +266,23 @@ function ProducaoEstamparia() {
                       {deletando === pedido.codigo ? "Deletando..." : "Deletar"}
                     </button>
                   </td>
+                  <td>
+                    <a
+                      className="btn btn-primary btn-sm"
+                      href={`/administrador/editar-pedido/${pedido.codigo}`}
+                      >
+                      Editar
+                    </a>
+                  </td>
                 </tr>
               ))}
           </tbody>
         </table>
-      </div> {/* Fim da div com table-responsive */}
-
-      <div className="d-flex justify-content-between align-items-center mt-3"> {/* Botões fora da tabela */}
+      </div>{" "}
+      {/* Fim da div com table-responsive */}
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        {" "}
+        {/* Botões fora da tabela */}
         <button
           className="btn btn-outline-primary btn-sm"
           onClick={() => setPaginaAtual((p) => Math.max(p - 1, 1))}
@@ -286,11 +301,10 @@ function ProducaoEstamparia() {
           Próxima
         </button>
       </div>
-
       <h2 className="text-center">Pedidos em Produção</h2>
       <div className="table-responsive">
         <table>
-          <thead >
+          <thead>
             <tr>
               <th>Código</th>
               <th>Data de Início</th>
@@ -302,7 +316,12 @@ function ProducaoEstamparia() {
           </thead>
           <tbody>
             {tabelaPedidos
-              .filter((pedido) => pedido.situacao === "Em andamento" || pedido.situacao === "Pausado" || pedido.situacao === "Pendente")
+              .filter(
+                (pedido) =>
+                  pedido.situacao === "Em andamento" ||
+                  pedido.situacao === "Pausado" ||
+                  pedido.situacao === "Pendente"
+              )
               .map((pedido) => (
                 <tr key={pedido.codigo}>
                   <td>{pedido.codigo}</td>
@@ -316,7 +335,6 @@ function ProducaoEstamparia() {
           </tbody>
         </table>
       </div>
-
       <GraficoDePedidos pedidos={pedidosFiltrados} />
     </div>
   );
