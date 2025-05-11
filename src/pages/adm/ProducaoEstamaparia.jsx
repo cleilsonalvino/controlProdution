@@ -6,29 +6,41 @@ import FiltroPedidos from "../../components/FiltroPedidos";
 const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
 
 // Utilitários
-const formatDateTime = (date) =>
-  date
-    ? new Date(date).toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: "America/Sao_Paulo",
-      })
-    : "-";
+// Formata data e hora completa para o fuso horário correto
+const formatDateTime = (date) => {
+  if (!date) return "-";
+
+  const dateObj = new Date(date);
+  const cutoffDate = new Date("2025-05-10T00:00:00.000Z");
+
+  // Ajusta apenas para pedidos antes de 10/05/2025
+  const adjustedDate =
+    dateObj < cutoffDate ? new Date(dateObj.getTime() - 3 * 60 * 60 * 1000) : dateObj;
+
+  return adjustedDate.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+};
 
 const formatTime = (date) => {
   if (!date) return "-";
 
-  // Cria a data a partir da string fornecida no formato ISO (UTC)
   const dateObj = new Date(date);
+  const cutoffDate = new Date("2025-05-10T00:00:00.000Z");
 
-  // Formata a hora sem aplicar o fuso horário local
-  return dateObj.toISOString().slice(11, 19); // Exibe apenas as horas, minutos e segundos (HH:MM:SS)
+  // Ajusta apenas para pedidos antes de 10/05/2025
+  const adjustedDate =
+    dateObj < cutoffDate ? new Date(dateObj.getTime() - 3 * 60 * 60 * 1000) : dateObj;
+
+  return adjustedDate.toISOString().slice(11, 19);
 };
+
 
 
 
